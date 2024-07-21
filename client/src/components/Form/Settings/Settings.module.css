@@ -1,0 +1,217 @@
+.settingsContainer {
+  background-color: #1e1e1e;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.settingsContainer h2 {
+  color: #ffffff;
+  font-family: "Open Sans", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.arrowBack {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out;
+}
+
+.arrowBack:hover {
+  transform: scale(1.1);
+}
+
+.updateForm {
+  max-width: 400px;
+  margin: 0 auto;
+  margin-top: 80px;
+}
+
+.inputContainer {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.inputIcon {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: auto;
+  pointer-events: none;
+}
+
+.inputField {
+  padding: 0.8rem 0.8rem 0.8rem 2.5rem;
+  margin-left: 0;
+  font-size: 1rem;
+  width: 100%;
+  outline: none;
+  border: 1.38px solid #d0d0d0;
+  border-radius: 11.03px;
+  background-color: transparent;
+  color: #828282;
+}
+
+.showIcon {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: auto;
+  cursor: pointer;
+}
+
+.button {
+  padding: 0.5rem;
+  background-color: #1a5fff;
+  color: #fff;
+  border: none;
+  font-weight: 400;
+  font-size: 1rem;
+  font-family: "Open Sans", sans-serif;
+  cursor: pointer;
+  border-radius: 55px;
+  width: 100%;
+  height: auto;
+  margin-top: 1.2rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.button:hover {
+  background-color: #2563eb;
+}
+
+.delButton {
+  background-color: #cf3636;
+  padding: 0.5rem;
+  color: #fff;
+  border: none;
+  font-weight: 400;
+  font-size: 1rem;
+  font-family: "Open Sans", sans-serif;
+  cursor: pointer;
+  border-radius: 55px;
+  width: 100%;
+  height: auto;
+  margin-top: 1.2rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.delButton:hover {
+  background-color: #b32f2f;
+}
+
+.logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  margin: 1rem;
+}
+
+.logout img {
+  width: 0.9rem;
+  height: 0.9rem;
+  cursor: pointer;
+}
+
+.logoutButton {
+  color: #cf3636;
+  width: 5rem;
+  height: 1.875rem;
+  text-align: center;
+  font-family: "Poppins";
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background-color: #1e1e1e;
+  padding: 1rem;
+  border-radius: 8px;
+  width: 400px;
+  height: auto;
+  text-align: center;
+}
+
+.modal p {
+  color: #ffffff;
+  font-family: "Open Sans", sans-serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.modalButtons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.modalButtons button {
+  padding: 0.5rem 1rem;
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+  font-family: "Open Sans", sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.separator {
+  margin: 0 0.5rem;
+  font-size: 1.8rem;
+  color: #47474a;
+}
+
+.modalButtons button:first-child {
+  color: #4b83ff;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: 10px;
+}
+
+.modalButtons button:first-child:hover {
+  background-color: #4b83ff;
+  color: #ffffff;
+}
+
+.modalButtons button:last-child {
+  color: #ffffff;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  border-radius: 10px;
+}
+
+.modalButtons button:last-child:hover {
+  background-color: #ffffff;
+  color: #4b83ff;
+}

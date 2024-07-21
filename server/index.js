@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRouter from "./routes/auth.routes.js";
+import userRouter from "./routes/user.routes.js";
 import path from "path";
 
 dotenv.config({ path: "../.env" });
@@ -35,6 +36,7 @@ mongoose
   });
 
 app.use("/api/auth", authRouter);
+app.use("/api/user", userRouter);
 
 const frontEndPath = path.join(__dirname, "../client/dist");
 

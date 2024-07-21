@@ -7,6 +7,7 @@ import ellipse1 from "../../assets/ellipse_1.png";
 import ellipse2 from "../../assets/ellipse_2.png";
 import { login } from "../../utils/auth";
 import { ToastContainer, toast } from "react-toastify";
+import Cookies from "js-cookie";
 import styles from "./Login.module.css";
 
 const Login = () => {
@@ -30,6 +31,22 @@ const Login = () => {
       toast.success("Registered successfully. Please login", {
         position: "top-right",
         autoClose: 1000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
+
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
+
+  useEffect(() => {
+    if (location.state?.passwordChanged) {
+      toast.success("Password changed. Please login", {
+        position: "top-right",
+        autoClose: 500,
         hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: false,
@@ -72,7 +89,10 @@ const Login = () => {
         setIsLoading(true);
         const response = await login(formData);
         if (response.success) {
-          navigate("/", { state: { registered: true } });
+          Cookies.set("accessToken", response.token);
+          localStorage.setItem("accessToken", response.token);
+          localStorage.setItem("user", JSON.stringify(response.user));
+          navigate("/home", { state: { loggedIn: true } });
         }
       } catch (error) {
         const errorMsg =

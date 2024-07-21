@@ -1,11 +1,33 @@
-import { Link } from "react-router-dom";
+import { useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import formBotImg from "../assets/formbotimg.png";
 import triangleImg from "../assets/triangle.png";
 import curveImg from "../assets/curve.png";
 import HeroPng from "../assets/figure.png";
+import chatBotDemoImg from "../assets/typebot-standard.png";
+import { toast, ToastContainer } from "react-toastify";
 import styles from "./LandingPage.module.css";
 
 const LandingPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.loggedOut) {
+      toast.success("Logged out successfully", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
+
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
+
   return (
     <div className={styles.landingPageContainer}>
       <header className={styles.header}>
@@ -28,7 +50,7 @@ const LandingPage = () => {
       </header>
 
       <main className={styles.main}>
-        <section className={styles.hero}>
+        <section className={styles.initialView}>
           <h1 className={styles.title}>Build advanced chatbots visually</h1>
           <p className={styles.subtitle}>
             FormBot gives you powerful blocks to create unique chat experiences.
@@ -42,9 +64,61 @@ const LandingPage = () => {
             <img src={triangleImg} alt="" className={styles.triangle} />
             <img src={curveImg} alt="" className={styles.curve} />
           </div>
-          <div className={styles.figure}>
-            <img src={HeroPng} alt="HeroPng" />
+        </section>
+
+        <section className={`${styles.hero} ${styles.scrollSection}`}>
+          <div className={styles.heroImageContainer}>
+            <div className={styles.heroImageBackground}></div>
+            <img src={HeroPng} alt="Hero" className={styles.heroImage} />
           </div>
+        </section>
+
+        <section className={styles.comparisonSection}>
+          <h2 className={styles.comparisonTitle}>
+            Replace your old school forms with chatbots
+          </h2>
+          <p className={styles.comparisonSubtitle}>
+            FormBot is a better way to ask for information. It leads to an
+            increase in customer satisfaction and retention and multiply by 3
+            your conversion rate compared to classical forms.
+          </p>
+          <div className={styles.comparisonContainer}>
+            <div className={styles.formContainer}>
+              <div className={styles.wrongMark}>✖</div>
+              <form className={styles.oldForm}>
+                <label>Full name </label>
+                <input type="text" placeholder="Full name" />
+                <label>Email </label>
+                <input type="email" placeholder="Email" />
+                <div className={styles.checkboxGroup}>
+                  <label>What services are you interested in?</label>
+                  <label>
+                    <input type="checkbox" /> Website Dev
+                  </label>
+                  <label>
+                    <input type="checkbox" /> Content Marketing
+                  </label>
+                  <label>
+                    <input type="checkbox" /> Social Media
+                  </label>
+                  <label>
+                    <input type="checkbox" /> UX/UI Design
+                  </label>
+                </div>
+                <textarea placeholder="Additional Information"></textarea>
+                <button type="submit">Submit</button>
+              </form>
+            </div>
+            <div className={styles.chatbotContainer}>
+              <div className={styles.rightMark}>✓</div>
+              <div className={styles.chatbotDemo}>
+                <p>Welcome to AA (Awesome Agency)</p>
+                <img src={chatBotDemoImg} alt="Chatbot Demo" />
+                <div className={styles.chatButton}>Hi!</div>
+              </div>
+            </div>
+          </div>
+          <p className={styles.tryItOut}>Try it out!</p>
         </section>
       </main>
 
@@ -121,6 +195,8 @@ const LandingPage = () => {
           </div>
         </div>
       </footer>
+
+      <ToastContainer />
     </div>
   );
 };
