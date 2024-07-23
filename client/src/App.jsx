@@ -6,6 +6,7 @@ import "./App.css";
 import Home from "./components/Form/Home/Home";
 import PrivateRoute from "./utils/PrivateRoute";
 import Settings from "./components/Form/Settings/Settings";
+import CreateForm from "./components/Form/CreateForm/CreateForm";
 
 const App = () => {
   return (
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route element={<PrivateRoute />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/create-form" element={<CreateForm />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
       </Routes>

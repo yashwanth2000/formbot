@@ -106,7 +106,10 @@ const Home = () => {
           </button>
         </div>
         <div className={styles.content}>
-          <div className={styles.createTypebot}>
+          <div
+            className={styles.createTypebot}
+            onClick={() => navigate("/create-form")}
+          >
             <span className={styles.plus}>+</span>
             <span>Create a form bot</span>
           </div>
