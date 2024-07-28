@@ -1,8 +1,8 @@
 .container {
-  background-color: #1e1e1e;
+  background: linear-gradient(0deg, #18181b 0%, #18181b 100%), #121212;
   min-height: 100vh;
   color: white;
-  padding: 20px 0;
+  padding: 10px 0;
   overflow: hidden;
 }
 
@@ -10,14 +10,13 @@
   display: flex;
   justify-content: center;
   position: relative;
-  padding-bottom: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  width: 100%;
+  padding-bottom: 10px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .dropdown {
   position: relative;
-  border: 1px solid #ffffff29;
+  border: 2px solid #ffffff29;
   border-radius: 6px;
 }
 
@@ -83,7 +82,15 @@
   padding: 20px 20px;
 }
 
-.folder {
+.folderContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+}
+
+.createFolderSection,
+.createdFolder {
   display: flex;
   align-items: center;
   border-radius: 6px;
@@ -96,6 +103,21 @@
   width: 15px;
   height: 15px;
   margin-right: 10px;
+}
+
+.folders {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.createdFolder {
+  gap: 10px;
+  color: #ffffffeb;
+  text-align: center;
+  font-family: "Open Sans";
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .addFolderButton {

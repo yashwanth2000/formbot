@@ -4,6 +4,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { ChevronDown, Settings, LogOut, ChevronUp } from "lucide-react";
 import { logout } from "../../../utils/auth";
 import folderIcon from "../../../assets/folder.png";
+import deleteIcon from "../../../assets/delete.png";
 import styles from "./Home.module.css";
 
 const Home = () => {
@@ -15,6 +16,8 @@ const Home = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+  const [folders, setFolders] = useState([]);
+  const [newFolderName, setNewFolderName] = useState(""); // New state for folder name
 
   useEffect(() => {
     if (location.state?.loggedIn) {
@@ -43,6 +46,22 @@ const Home = () => {
     };
   }, [location.state, navigate, location.pathname]);
 
+  useEffect(() => {
+    if (location.state?.saved) {
+      toast.success("Form saved successful", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
+
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
+
   const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   const toggleLogoutModal = () => {
@@ -66,14 +85,22 @@ const Home = () => {
   };
 
   const handleCreateFolder = () => {
-    toggleCreateFolderModal();
+    if (newFolderName.trim() !== "") {
+      setFolders([...folders, { name: newFolderName }]);
+      setNewFolderName("");
+      toggleCreateFolderModal();
+    }
   };
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div className={styles.dropdown} ref={dropdownRef}>
-          <button className={styles.dropdownToggle} onClick={toggleDropdown}>
+      <header className={styles.header}>
+        <nav className={styles.dropdown} ref={dropdownRef}>
+          <button
+            className={styles.dropdownToggle}
+            onClick={toggleDropdown}
+            aria-expanded={isDropdownOpen}
+          >
             {`${capitalizeFirstLetter(user.name)}'s workspace`}
             {isDropdownOpen ? (
               <ChevronUp size={20} className={styles.dropdownArrow} />
@@ -93,32 +120,51 @@ const Home = () => {
               </a>
             </div>
           )}
-        </div>
-      </div>
-      <div className={styles.mainContainer}>
-        <div className={styles.folder}>
-          <img src={folderIcon} alt="Add" className={styles.folderIcon} />
-          <button
-            className={styles.addFolderButton}
-            onClick={toggleCreateFolderModal}
-          >
-            Create Folder
-          </button>
-        </div>
-        <div className={styles.content}>
+        </nav>
+      </header>
+      <main className={styles.mainContainer}>
+        <section className={styles.folderContainer}>
+          <div className={styles.createFolderSection}>
+            <img
+              src={folderIcon}
+              alt="Add Folder"
+              className={styles.folderIcon}
+            />
+            <button
+              className={styles.addFolderButton}
+              onClick={toggleCreateFolderModal}
+            >
+              Create Folder
+            </button>
+          </div>
+          <div className={styles.folders}>
+            {folders.map((folder, index) => (
+              <div key={index} className={styles.createdFolder}>
+                {folder.name}
+                <img
+                  src={deleteIcon}
+                  alt="Delete Folder"
+                  className={styles.folderIcon}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className={styles.content}>
           <div
             className={styles.createTypebot}
-            onClick={() => navigate("/create-form")}
+            onClick={() => navigate("/flow")}
           >
             <span className={styles.plus}>+</span>
             <span>Create a form bot</span>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
       {showLogoutModal && (
-        <div className={styles.modalOverlay}>
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true">
           <div className={styles.modal}>
-            <p>Are you sure you want Logout?</p>
+            <p>Are you sure you want to logout?</p>
             <div className={styles.modalButtons}>
               <button onClick={handleLogout}>Yes, Logout</button>
               <span className={styles.separator}>|</span>
@@ -128,13 +174,16 @@ const Home = () => {
         </div>
       )}
       {showCreateFolderModal && (
-        <div className={styles.modalOverlay}>
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true">
           <div className={styles.modal}>
             <p>Create New Folder</p>
             <input
               type="text"
               placeholder="Enter Folder Name"
               className={styles.input}
+              aria-label="Folder Name"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)} // Update state on input change
             />
             <div className={styles.modalButtons}>
               <button onClick={handleCreateFolder}>Done</button>

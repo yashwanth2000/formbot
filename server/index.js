@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRouter from "./routes/auth.routes.js";
 import userRouter from "./routes/user.routes.js";
+import formRouter from "./routes/form.routes.js";
 import path from "path";
 
 dotenv.config({ path: "../.env" });
@@ -37,6 +38,8 @@ mongoose
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
+app.use("/api/form", formRouter);
+
 
 const frontEndPath = path.join(__dirname, "../client/dist");
 
