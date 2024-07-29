@@ -15,7 +15,7 @@ const formElementSchema = new mongoose.Schema({
   },
   inputType: {
     type: String,
-    enum: ["Text", "Number", "Email", "Phone", "Date", "Rating", "Button"],
+    enum: ["Text", "Number", "Email", "Phone", "Date", "Radio", "Button"],
     required: function () {
       return this.elementType === "input";
     },

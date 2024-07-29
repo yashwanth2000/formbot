@@ -70,11 +70,16 @@
 }
 
 .shareBtn {
-  background-color: #848890;
+  background-color: #1a5fff;
 }
 
 .shareBtn:hover {
-  background-color: #a0a3a8;
+  background-color: #2757c7;
+}
+
+.shareBtn:disabled {
+  background-color: #4a4a4a;
+  cursor: not-allowed;
 }
 
 .saveBtn {
@@ -82,7 +87,7 @@
 }
 
 .saveBtn:hover {
-  background-color: #61f18ccc;
+  background-color: #2eac53cc;
 }
 
 .cancelIcon {
@@ -253,21 +258,41 @@
   outline: none;
 }
 
-.shareBtn:disabled {
-  background-color: #4a4a4a;
-  cursor: not-allowed;
-}
-
 .preview {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 10px;
+  width: 100%;
 }
 
-.preview img {
-  width: 100%;
-  height: 100%;
+.preview img,
+.preview video {
+  max-width: 100%;
+  height: auto;
   object-fit: contain;
   border-radius: 8px;
+}
+
+.elementHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background: #1f1f23;
+}
+
+.elementIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0 10px;
+  background: none;
+}
+
+.inputHint {
+  color: #555;
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 10px 0;
 }

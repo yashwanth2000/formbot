@@ -9,6 +9,7 @@ import Settings from "./components/Form/Settings/Settings";
 import Flow from "./components/Form/CreateForm/Flow";
 import Theme from "./components/Form/CreateForm/Theme";
 import Response from "./components/Form/CreateForm/Response";
+import ShareForm from "./components/Form/ShareForm/ShareForm";
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
           <Route path="/analytics" element={<Response />} />
           <Route path="/settings" element={<Settings />} />
         </Route>
+        <Route path="/share/:formId" element={<ShareForm />} />
       </Routes>
     </BrowserRouter>
   );

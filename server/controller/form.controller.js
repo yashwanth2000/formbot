@@ -104,3 +104,62 @@ export const deleteForm = async (req, res, next) => {
     }
   }
 };
+
+export const updateInputValue = async (req, res, next) => {
+  try {
+    const { formId, elementId } = req.params;
+    const { value } = req.body;
+
+    const form = await Form.findById(formId);
+    if (!form) {
+      return res.status(404).json({ message: "Form not found" });
+    }
+
+    const element = form.elements.id(elementId);
+    if (!element) {
+      return res.status(404).json({ message: "Element not found" });
+    }
+
+    if (element.elementType !== "input") {
+      return res.status(400).json({ message: "Element is not of type input" });
+    }
+
+    element.value = value;
+
+    await form.save();
+    res.json(element);
+  } catch (error) {
+    next(errorHandler(500, error.message));
+  }
+};
+
+export const updateFormAnalytics = async (req, res, next) => {
+  try {
+    const form = await Form.findById(req.params.id);
+    if (!form) {
+      return res.status(404).json({ message: "Form not found" });
+    }
+
+    const { completions, views, starts } = req.body;
+    if (views < 0 || starts < 0 || completions < 0) {
+      return res
+        .status(400)
+        .json({ message: "Analytics values cannot be negative" });
+    }
+
+    form.analytics = {
+      ...form.analytics,
+      ...req.body,
+    };
+
+    if (form.analytics.views > 0) {
+      form.analytics.completionRate =
+        form.analytics.completions / form.analytics.views;
+    }
+
+    await form.save();
+    res.json(form.analytics);
+  } catch (error) {
+    next(errorHandler(500, error.message));
+  }
+};

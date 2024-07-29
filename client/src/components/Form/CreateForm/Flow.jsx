@@ -16,10 +16,12 @@ import CancelImg from "../../../assets/cancel.png";
 import DeleteImg from "../../../assets/delete.png";
 import { toast, ToastContainer } from "react-toastify";
 import { createForm } from "../../../utils/form";
+import copy from "copy-to-clipboard";
 import styles from "./Flow.module.css";
 
 const Flow = () => {
   const navigate = useNavigate();
+  const [formId, setFormId] = useState("");
   const [formName, setFormName] = useState("");
   const [formElements, setFormElements] = useState([]);
   const [errors, setErrors] = useState({});
@@ -35,7 +37,7 @@ const Flow = () => {
     inputEmail: 0,
     inputPhone: 0,
     inputDate: 0,
-    inputRange: 0,
+    inputRadio: 0,
     inputButton: 0,
   });
 
@@ -46,6 +48,8 @@ const Flow = () => {
 
   const handleCancel = () => {
     setFormName("");
+    setFormElements([]);
+    setErrors({});
     navigate("/home");
   };
 
@@ -85,7 +89,11 @@ const Flow = () => {
 
   const updateElement = (index, field, value) => {
     const updatedElements = [...formElements];
-    updatedElements[index][field] = value;
+    if (field === "value" && formElements[index].inputType === "Button") {
+      updatedElements[index][field] = value; // Ensure value is a string
+    } else {
+      updatedElements[index][field] = value;
+    }
     setFormElements(updatedElements);
     setErrors({ ...errors, [index]: "" });
   };
@@ -95,9 +103,13 @@ const Flow = () => {
     if (!formName.trim()) {
       newErrors.formName = "Form name is required";
     }
-    if (formElements.length === 0) {
-      newErrors.formElements = "Form elements are required";
-      toast.error("Form elements are required", {
+
+    const hasBubble = formElements.some((el) => el.elementType === "bubble");
+    const hasInput = formElements.some((el) => el.elementType === "input");
+
+    if (!hasBubble || !hasInput) {
+      newErrors.formElements = "At least one bubble and one input are required";
+      toast.error("At least one bubble and one input are required", {
         position: "top-right",
         autoClose: 1000,
         hideProgressBar: true,
@@ -107,6 +119,7 @@ const Flow = () => {
         theme: "dark",
       });
     }
+
     formElements.forEach((element, index) => {
       if (element.elementType === "bubble" && !element.content.trim()) {
         newErrors[index] = "Required Field";
@@ -132,7 +145,7 @@ const Flow = () => {
               return {
                 elementType: element.elementType,
                 inputType: element.inputType,
-                label: element.label,
+                label: element.label || `Enter ${element.inputType}`,
                 value: element.inputType === "Button" ? element.value : "",
               };
             }
@@ -140,13 +153,20 @@ const Flow = () => {
         };
 
         const response = await createForm(formData);
-        console.log("Form saved successfully:", response);
 
         if (response) {
+          toast.success("Form saved successfully", {
+            position: "top-right",
+            autoClose: 1000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            theme: "dark",
+          });
+
+          setFormId(response._id);
           setIsSaved(true);
-          setFormName("");
-          setFormElements([]);
-          navigate("/home", { state: { saved: true } });
         }
       } catch (error) {
         console.error("Error saving form:", error);
@@ -191,7 +211,7 @@ const Flow = () => {
       inputEmail: 0,
       inputPhone: 0,
       inputDate: 0,
-      inputRange: 0,
+      inputRadio: 0,
       inputButton: 0,
     };
 
@@ -214,6 +234,37 @@ const Flow = () => {
     });
 
     setFormElements(newElements);
+  };
+
+  const handleShare = () => {
+    const url = import.meta.env.VITE_SHARE_URL + `/share/${formId}`;
+
+    try {
+      const success = copy(url);
+      if (success) {
+        toast.success("Link copied to clipboard", {
+          position: "top-right",
+          autoClose: 1000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          theme: "dark",
+        });
+      } else {
+        toast.error("Failed to copy. Please try again.", {
+          position: "top-right",
+          autoClose: 1000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          theme: "dark",
+        });
+      }
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+    }
   };
 
   return (
@@ -239,7 +290,11 @@ const Flow = () => {
           </Link>
         </nav>
         <div className={styles.rightButtons}>
-          <button className={styles.shareBtn} disabled={!isSaved}>
+          <button
+            className={styles.shareBtn}
+            disabled={!isSaved}
+            onClick={handleShare}
+          >
             Share
           </button>
           <button className={styles.saveBtn} onClick={handleSave}>
@@ -330,7 +385,7 @@ const Flow = () => {
               </div>
               <div
                 className={styles.bubble}
-                onClick={() => addInputElement("Range")}
+                onClick={() => addInputElement("Radio")}
               >
                 <img src={RatingIcon} alt="Rating Icon" />
                 <button className={styles.bubbleButton}>Rating</button>
@@ -363,52 +418,110 @@ const Flow = () => {
               <h4>{element.displayLabel}</h4>
               {element.elementType === "bubble" ? (
                 <>
-                  <input
-                    type={element.bubbleType === "Text" ? "text" : "url"}
-                    placeholder={`Enter ${element.bubbleType} content`}
-                    value={element.content}
-                    onChange={(e) =>
-                      updateElement(index, "content", e.target.value)
-                    }
-                  />
-                  {(element.bubbleType === "Image" ||
-                    element.bubbleType === "GIF" ||
-                    element.bubbleType === "Video") &&
-                    element.content && (
-                      <div className={styles.preview}>
-                        {element.bubbleType === "Image" && (
-                          <img src={element.content} alt="Preview" />
-                        )}
-                        {element.bubbleType === "GIF" && (
-                          <img src={element.content} alt="GIF Preview" />
-                        )}
-                        {element.bubbleType === "Video" && (
-                          <video src={element.content} controls />
-                        )}
-                      </div>
-                    )}
+                  <div className={styles.elementHeader}>
+                    <img
+                      src={
+                        element.bubbleType === "Text"
+                          ? MsgIcon
+                          : element.bubbleType === "Image"
+                          ? ImgIcon
+                          : element.bubbleType === "Video"
+                          ? VideoIcon
+                          : GifIcon
+                      }
+                      alt={element.displayLabel}
+                      className={styles.elementIcon}
+                    />
+                    <input
+                      type={element.bubbleType === "Text" ? "text" : "url"}
+                      placeholder={
+                        element.bubbleType === "Text"
+                          ? "Click here to edit"
+                          : "Click to add URL"
+                      }
+                      value={element.content}
+                      onChange={(e) =>
+                        updateElement(index, "content", e.target.value)
+                      }
+                    />
+                    {(element.bubbleType === "Image" ||
+                      element.bubbleType === "GIF" ||
+                      element.bubbleType === "Video") &&
+                      element.content && (
+                        <div className={styles.preview}>
+                          {element.bubbleType === "Image" && (
+                            <img src={element.content} alt="Preview" />
+                          )}
+                          {element.bubbleType === "GIF" && (
+                            <img src={element.content} alt="GIF Preview" />
+                          )}
+                          {element.bubbleType === "Video" && (
+                            <video
+                              src={element.content}
+                              controls
+                              width="100%"
+                              height="auto"
+                            >
+                              Your browser does not support the video tag.
+                            </video>
+                          )}
+                        </div>
+                      )}
+                  </div>
                 </>
               ) : (
-                <input
-                  type="text"
-                  placeholder={
-                    element.inputType === "Button"
-                      ? "Enter button text"
-                      : "Enter placeholder"
-                  }
-                  value={
-                    element.inputType === "Button"
-                      ? element.value
-                      : element.label
-                  }
-                  onChange={(e) =>
-                    updateElement(
-                      index,
-                      element.inputType === "Button" ? "value" : "label",
-                      e.target.value
-                    )
-                  }
-                />
+                <>
+                  <p className={styles.inputHint}>
+                    {element.inputType === "Date"
+                      ? "Hint: User will select a date"
+                      : element.inputType === "Radio"
+                      ? "Hint : User will tap to rate out of 5"
+                      : element.inputType === "Button"
+                      ? "Hint: User will click this button"
+                      : `Hint: User will input ${element.inputType.toLowerCase()} on the form`}
+                  </p>
+                  <div className={styles.elementHeader}>
+                    <img
+                      src={
+                        element.inputType === "Text"
+                          ? TextIcon
+                          : element.inputType === "Number"
+                          ? NumIcon
+                          : element.inputType === "Email"
+                          ? EmailIcon
+                          : element.inputType === "Phone"
+                          ? PhoneIcon
+                          : element.inputType === "Date"
+                          ? DateIcon
+                          : element.inputType === "Range"
+                          ? RatingIcon
+                          : BtnIcon
+                      }
+                      alt=""
+                      className={styles.elementIcon}
+                    />
+                    <input
+                      type="text"
+                      placeholder={
+                        element.inputType === "Button"
+                          ? "Enter button text"
+                          : "Enter placeholder text"
+                      }
+                      value={
+                        element.inputType === "Button"
+                          ? element.value
+                          : element.label
+                      }
+                      onChange={(e) =>
+                        updateElement(
+                          index,
+                          element.inputType === "Button" ? "value" : "label",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                </>
               )}
               {errors[index] && (
                 <span className={styles.error}>{errors[index]}</span>

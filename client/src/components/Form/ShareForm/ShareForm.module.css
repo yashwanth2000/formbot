@@ -1,0 +1,88 @@
+.shareFormContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.light {
+  background-color: #f0f0f0;
+  color: #333;
+}
+
+.dark {
+  background-color: #333;
+  color: #f0f0f0;
+}
+
+.tallblue {
+  background-color: #3490dc;
+  color: #ffffff;
+}
+
+.formTitle {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.elementsContainer {
+  width: 100%;
+  max-width: 600px;
+}
+
+.elementWrapper {
+  margin-bottom: 20px;
+}
+
+.bubble,
+.input {
+  max-width: 80%;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.left {
+  align-self: flex-start;
+  background-color: #e1e1e1;
+}
+
+.right {
+  align-self: flex-end;
+  background-color: #007bff;
+  color: white;
+}
+
+.bubble img,
+.bubble video {
+  max-width: 100%;
+  border-radius: 5px;
+}
+
+.input label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.input input {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.input button,
+.nextButton {
+  padding: 5px 10px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.nextButton {
+  display: block;
+  margin-top: 10px;
+  margin-left: auto;
+}
