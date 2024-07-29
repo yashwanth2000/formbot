@@ -50,9 +50,16 @@ const formSchema = new mongoose.Schema(
     },
     theme: {
       type: String,
-      enum: ["Light", "Dark", "Tall Blue"],
-      default: "Light",
+      enum: ["light", "dark", "tailBlue"],
+      default: "light",
     },
+    submissions: [
+      {
+        elementId: mongoose.Schema.Types.ObjectId,
+        value: mongoose.Schema.Types.Mixed,
+        submittedAt: { type: Date, default: Date.now },
+      },
+    ],
     analytics: {
       views: { type: Number, default: 0 },
       starts: { type: Number, default: 0 },

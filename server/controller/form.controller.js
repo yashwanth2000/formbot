@@ -124,10 +124,14 @@ export const updateInputValue = async (req, res, next) => {
       return res.status(400).json({ message: "Element is not of type input" });
     }
 
-    element.value = value;
+    // Add new submission instead of updating the element
+    form.submissions.push({
+      elementId: element._id,
+      value: value,
+    });
 
     await form.save();
-    res.json(element);
+    res.json(form.submissions[form.submissions.length - 1]);
   } catch (error) {
     next(errorHandler(500, error.message));
   }
