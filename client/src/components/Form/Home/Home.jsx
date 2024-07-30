@@ -7,6 +7,11 @@ import folderIcon from "../../../assets/folder.png";
 import deleteIcon from "../../../assets/delete.png";
 import styles from "./Home.module.css";
 import { getAllForms, deleteForm } from "../../../utils/form";
+import {
+  createFolder,
+  deleteFolder,
+  getAllFolders,
+} from "../../../utils/folder";
 
 const Home = () => {
   const location = useLocation();
@@ -45,7 +50,18 @@ const Home = () => {
       }
     };
 
+    const fetchFolders = async () => {
+      try {
+        const response = await getAllFolders();
+        setFolders(response);
+      } catch (error) {
+        console.error("Error fetching folders:", error);
+      }
+    };
+
     fetchFormData();
+    fetchFolders();
+
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
@@ -80,11 +96,55 @@ const Home = () => {
     setShowCreateFolderModal(!showCreateFolderModal);
   };
 
-  const handleCreateFolder = () => {
+  const handleCreateFolder = async () => {
     if (newFolderName.trim() !== "") {
-      setFolders([...folders, { name: newFolderName }]);
-      setNewFolderName("");
-      toggleCreateFolderModal();
+      try {
+        await createFolder({ name: newFolderName });
+        const updatedFolders = await getAllFolders();
+        setFolders(updatedFolders);
+        setNewFolderName("");
+        toggleCreateFolderModal();
+      } catch (error) {
+        console.error("Error creating folder:", error);
+        toast.error("Failed to create folder", {
+          position: "top-right",
+          autoClose: 500,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          theme: "dark",
+        });
+      }
+    }
+  };
+
+  const handleDeleteFolder = async (id) => {
+    try {
+      await deleteFolder(id);
+      const updatedFolders = await getAllFolders();
+      setFolders(updatedFolders);
+      toast.success("Folder deleted successfully", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
+      navigate("/home");
+    } catch (error) {
+      console.error("Error deleting folder:", error);
+      toast.error("Error deleting folder", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
     }
   };
 
@@ -116,6 +176,13 @@ const Home = () => {
       });
     }
   };
+
+  const handleFolderClick = (id, name) => {
+    navigate(`/folder/${id}`, { state: { folderName: name } });
+  };
+
+  // Filter forms with folderId: null
+  const filteredForms = formData.filter((form) => form.folderId === null);
 
   return (
     <div className={styles.container}>
@@ -163,13 +230,16 @@ const Home = () => {
             </button>
           </div>
           <div className={styles.folders}>
-            {folders.map((folder, index) => (
-              <div key={index} className={styles.createdFolder}>
-                {folder.name}
+            {folders.map((folder) => (
+              <div key={folder._id} className={styles.createdFolder}>
+                <span onClick={() => handleFolderClick(folder._id, folder.name)}>
+                  {folder.name}
+                </span>
                 <img
                   src={deleteIcon}
                   alt="Delete Folder"
                   className={styles.folderIcon}
+                  onClick={() => handleDeleteFolder(folder._id)}
                 />
               </div>
             ))}
@@ -185,18 +255,22 @@ const Home = () => {
             <span>Create a form bot</span>
           </div>
 
-          {formData.map((form, index) => (
-            <div key={index} className={styles.formCard}>
-              <div className={styles.formName}>{form.name}</div>
-              <div className={styles.deleteIcon}>
-                <img
-                  src={deleteIcon}
-                  alt="Delete"
-                  onClick={() => handleDeleteForm(form._id)}
-                />
+          {filteredForms.length > 0 ? (
+            filteredForms.map((form) => (
+              <div key={form._id} className={styles.formCard}>
+                <div className={styles.formName}>{form.name}</div>
+                <div className={styles.deleteIcon}>
+                  <img
+                    src={deleteIcon}
+                    alt="Delete"
+                    onClick={() => handleDeleteForm(form._id)}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p>No forms to display</p>
+          )}
         </section>
       </main>
       {showLogoutModal && (
@@ -204,7 +278,7 @@ const Home = () => {
           <div className={styles.modal}>
             <p>Are you sure you want to logout?</p>
             <div className={styles.modalButtons}>
-              <button onClick={handleLogout}>Yes, Logout</button>
+              <button onClick={handleLogout}>Logout</button>
               <span className={styles.separator}>|</span>
               <button onClick={toggleLogoutModal}>Cancel</button>
             </div>

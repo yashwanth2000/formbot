@@ -8,6 +8,7 @@ import {
   deleteForm,
   updateFormAnalytics,
   updateInputValue,
+  getFormsByFolder,
 } from "../controller/form.controller.js";
 import verifyToken from "../utils/verifyToken.js";
 
@@ -18,5 +19,6 @@ router.put("/update/:id", verifyToken, updateForm);
 router.delete("/delete/:id", verifyToken, deleteForm);
 router.put("/updateAnalytics/:id", updateFormAnalytics);
 router.put('/updateInputValue/:formId/:elementId', updateInputValue);
+router.get('/folderForms/:folderId', verifyToken, getFormsByFolder);
 
 export default router;

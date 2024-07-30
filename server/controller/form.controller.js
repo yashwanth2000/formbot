@@ -167,3 +167,15 @@ export const updateFormAnalytics = async (req, res, next) => {
     next(errorHandler(500, error.message));
   }
 };
+
+export const getFormsByFolder = async (req, res) => {
+  try {
+    const { folderId } = req.params; // Changed from req.body to req.params
+
+    const forms = await Form.find({ folderId });
+    res.status(200).json(forms);
+  } catch (error) {
+    console.error("Error fetching forms by folder:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};

@@ -14,7 +14,7 @@ const Response = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getFormById("66a89cac2365454bc40b8898");
+        const response = await getFormById("66a8d44087d2d660b4119121");
         if (response && response.analytics && response.submissions) {
           setFormData(response.analytics);
           setSubmissions(response.submissions);
@@ -44,13 +44,11 @@ const Response = () => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const options = {
+      timeZone: "Asia/Kolkata",
       month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
+      day: "2-digit",
     };
-    return new Intl.DateTimeFormat("en-US", options).format(date);
+    return new Intl.DateTimeFormat("en-IN", options).format(date);
   };
 
   const groupSubmissions = (submissions) => {

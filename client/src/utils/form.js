@@ -90,3 +90,15 @@ export const updateFormAnalytics = async (
     throw error;
   }
 };
+
+export const getAllFormsByFolder = async (folderId) => {
+  try {
+    const response = await axiosInstance.get(
+      `/api/form/folderForms/${folderId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error getting forms by folder:", error);
+    throw error;
+  }
+};

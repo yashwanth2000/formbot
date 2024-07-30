@@ -10,6 +10,7 @@ import Flow from "./components/Form/CreateForm/Flow";
 import Theme from "./components/Form/CreateForm/Theme";
 import Response from "./components/Form/CreateForm/Response";
 import ShareForm from "./components/Form/ShareForm/ShareForm";
+import FolderView from "./components/Form/Home/FolderView";
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
         <Route path="/register" element={<Register />} />
         <Route element={<PrivateRoute />}>
           <Route path="/home" element={<Home />} />
+          <Route path="/folder/:id" element={<FolderView />} />
           <Route path="/flow" element={<Flow />} />
           <Route path="/theme" element={<Theme />} />
           <Route path="/analytics" element={<Response />} />

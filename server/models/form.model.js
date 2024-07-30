@@ -45,8 +45,10 @@ const formSchema = new mongoose.Schema(
     },
     elements: [formElementSchema],
     folderId: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Folder",
       trim: true,
+      default: null,
     },
     theme: {
       type: String,
