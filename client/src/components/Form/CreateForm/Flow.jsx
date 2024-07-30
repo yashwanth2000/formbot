@@ -90,7 +90,7 @@ const Flow = () => {
   const updateElement = (index, field, value) => {
     const updatedElements = [...formElements];
     if (field === "value" && formElements[index].inputType === "Button") {
-      updatedElements[index][field] = value; // Ensure value is a string
+      updatedElements[index][field] = value;
     } else {
       updatedElements[index][field] = value;
     }
@@ -270,16 +270,20 @@ const Flow = () => {
   return (
     <div className={styles.flowContainer}>
       <header className={styles.header}>
-        <input
-          type="text"
-          value={formName}
-          onChange={handleChange}
-          placeholder="Enter Form Name"
-          className={styles.formNameInput}
-        />
-        {errors.formName && (
-          <span className={styles.error}>{errors.formName}</span>
-        )}
+        <div className={styles.formNameContainer}>
+          <input
+            type="text"
+            value={formName}
+            onChange={handleChange}
+            placeholder="Enter Form Name"
+            className={`${styles.formNameInput} ${
+              errors.formName ? styles.errorInput : ""
+            }`}
+          />
+          {errors.formName && (
+            <span className={styles.errorMessage}>{errors.formName}</span>
+          )}
+        </div>
         <nav className={styles.middleButtons}>
           <Link className={styles.button}>Flow</Link>
           <Link to="/theme" className={styles.button}>

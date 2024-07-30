@@ -17,6 +17,9 @@ const ShareForm = () => {
   const [hasStarted, setHasStarted] = useState(false);
   const [clickedButtons, setClickedButtons] = useState({});
   const [theme, setTheme] = useState("light");
+  const [submittedInputs, setSubmittedInputs] = useState({});
+  const [selectedRadios, setSelectedRadios] = useState({});
+  const [inputErrors, setInputErrors] = useState({});
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -53,51 +56,115 @@ const ShareForm = () => {
     }
   }, [form, currentElementIndex, showNextElement]);
 
-  const handleInputChange = (elementId, value) => {
+  const handleInputChange = (elementId, value, inputType) => {
+    let errorMessage = "";
+
+    setInputErrors((prev) => ({
+      ...prev,
+      [elementId]: errorMessage,
+    }));
+
     setUserInputs((prev) => ({ ...prev, [elementId]: value }));
+
+    if (inputType === "Radio") {
+      setSelectedRadios((prev) => ({
+        ...prev,
+        [elementId]: value,
+      }));
+    }
   };
 
   const handleInputSubmit = async (elementId) => {
     const currentElement = form.elements[currentElementIndex];
 
-    if (currentElement.elementType === "input") {
-      await updateInputValue(formId, elementId, userInputs[elementId] || "");
+    if (currentElement.elementType === "input" && !submittedInputs[elementId]) {
+      if (!userInputs[elementId] || userInputs[elementId].trim() === "") {
+        setInputErrors((prev) => ({
+          ...prev,
+          [elementId]: "This field cannot be empty",
+        }));
+        return;
+      }
 
-      setUserInputs((prev) => ({ ...prev, [elementId]: "" }));
+      if (
+        currentElement.inputType === "Email" &&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userInputs[elementId])
+      ) {
+        setInputErrors((prev) => ({
+          ...prev,
+          [elementId]: "Please enter a valid email address.",
+        }));
+        return;
+      }
 
-      // Disable input and send button after submission
-      const inputElement = document.querySelector(`input[name="${elementId}"]`);
-      const sendButton = document.querySelector(`.sendBtn-${elementId}`);
+      if (
+        currentElement.inputType === "Phone" &&
+        !/^\d{10,}$/.test(userInputs[elementId])
+      ) {
+        setInputErrors((prev) => ({
+          ...prev,
+          [elementId]:
+            "Please enter a valid phone number (at least 10 digits).",
+        }));
+        return;
+      }
 
-      if (inputElement) inputElement.classList.add(styles.disabled);
-      if (sendButton) sendButton.classList.add(styles.disabled);
+      setInputErrors((prev) => ({ ...prev, [elementId]: "" }));
+
+      await updateInputValue(formId, elementId, userInputs[elementId]);
+
+      setSubmittedInputs((prev) => ({
+        ...prev,
+        [elementId]: userInputs[elementId],
+      }));
+
+      if (currentElement.inputType === "Radio") {
+        setSelectedRadios((prev) => ({
+          ...prev,
+          [elementId]: userInputs[elementId],
+        }));
+      }
+
+      if (!hasStarted) {
+        await updateFormAnalytics(
+          formId,
+          form.analytics.completions,
+          form.analytics.views,
+          form.analytics.starts + 1
+        );
+        setHasStarted(true);
+      }
+
+      if (currentElementIndex < form.elements.length - 1) {
+        setCurrentElementIndex((prev) => prev + 1);
+        setShowNextElement(true);
+      } else {
+        await updateFormAnalytics(
+          formId,
+          form.analytics.completions + 1,
+          form.analytics.views,
+          form.analytics.starts
+        );
+      }
     }
+  };
 
-    if (!hasStarted) {
-      await updateFormAnalytics(
-        formId,
-        form.analytics.completions,
-        form.analytics.views,
-        form.analytics.starts + 1
-      );
-      setHasStarted(true);
-    }
+  const handleButtonClick = (elementId) => {
+    if (clickedButtons[elementId]) return;
+
+    setClickedButtons((prev) => ({ ...prev, [elementId]: true }));
 
     if (currentElementIndex < form.elements.length - 1) {
       setCurrentElementIndex((prev) => prev + 1);
       setShowNextElement(true);
     } else {
-      await updateFormAnalytics(
+      updateFormAnalytics(
         formId,
         form.analytics.completions + 1,
         form.analytics.views,
         form.analytics.starts
       );
     }
-  };
-
-  const handleButtonClick = (elementId) => {
-    setClickedButtons((prev) => ({ ...prev, [elementId]: true }));
   };
 
   const renderElement = (element) => {
@@ -130,6 +197,7 @@ const ShareForm = () => {
                   clickedButtons[element._id] ? styles.buttonClicked : ""
                 }`}
                 onClick={() => handleButtonClick(element._id)}
+                disabled={!!clickedButtons[element._id]}
               >
                 {element.value || "Button"}{" "}
               </button>
@@ -138,14 +206,20 @@ const ShareForm = () => {
                 {[1, 2, 3, 4, 5].map((value) => (
                   <div className={styles.inputRadioContainer} key={value}>
                     <label
-                      className={
-                        userInputs[element._id] === String(value)
-                          ? "selected"
+                      className={`${styles.radioLabel} ${
+                        selectedRadios[element._id] === String(value)
+                          ? styles.selectedRadio
                           : ""
-                      }
-                      onClick={() =>
-                        handleInputChange(element._id, String(value))
-                      }
+                      }`}
+                      onClick={() => {
+                        if (!submittedInputs[element._id]) {
+                          handleInputChange(
+                            element._id,
+                            String(value),
+                            element.inputType
+                          );
+                        }
+                      }}
                     >
                       {value}
                     </label>
@@ -153,28 +227,55 @@ const ShareForm = () => {
                 ))}
                 <button
                   onClick={() => handleInputSubmit(element._id)}
-                  className={`${styles.sendBtn} sendBtn-${element._id}`}
+                  className={`${styles.sendBtn} sendBtn-${element._id} ${
+                    submittedInputs[element._id] ? styles.sentBtn : ""
+                  }`}
+                  disabled={!!submittedInputs[element._id]}
                 >
                   <img src={SendICon} alt="Send Icon" />
                 </button>
               </div>
             ) : (
               <div className={styles.inputContainer}>
-                <input
-                  type={element.inputType.toLowerCase()}
-                  value={userInputs[element._id] || ""}
-                  onChange={(e) =>
-                    handleInputChange(element._id, e.target.value)
-                  }
-                  placeholder={element.label || `Enter ${element.inputType}`}
-                  name={element._id}
-                />
-                <button
-                  onClick={() => handleInputSubmit(element._id)}
-                  className={`${styles.sendBtn} sendBtn-${element._id}`}
-                >
-                  <img src={SendICon} alt="Send Icon" />
-                </button>
+                <>
+                  <input
+                    type={element.inputType.toLowerCase()}
+                    value={
+                      submittedInputs[element._id] ||
+                      userInputs[element._id] ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      handleInputChange(
+                        element._id,
+                        e.target.value,
+                        element.inputType
+                      )
+                    }
+                    placeholder={element.label || `Enter ${element.inputType}`}
+                    name={element._id}
+                    disabled={!!submittedInputs[element._id]}
+                    className={
+                      submittedInputs[element._id] ? styles.submittedInput : ""
+                    }
+                  />
+                  <button
+                    onClick={() => handleInputSubmit(element._id)}
+                    className={`${styles.sendBtn} sendBtn-${element._id} ${
+                      submittedInputs[element._id] ? styles.sentBtn : ""
+                    }`}
+                    disabled={!!submittedInputs[element._id]}
+                  >
+                    <img src={SendICon} alt="Send Icon" />
+                  </button>
+                </>
+                <div className={styles.errorMessageContainer}>
+                  {inputErrors[element._id] && (
+                    <span className={styles.errorMessage}>
+                      {inputErrors[element._id]}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
           </div>

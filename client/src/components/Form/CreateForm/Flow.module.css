@@ -15,10 +15,16 @@
   width: 100%;
 }
 
+.formNameContainer {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+
 .formNameInput {
   border-radius: 3px;
-  border: none;
   background-color: #37373e;
+  border: 1px solid #37373e;
   color: #767676d1;
   font-family: "Open Sans";
   font-size: 12px;
@@ -28,6 +34,18 @@
   outline: none;
   width: 250px;
   height: auto;
+}
+
+.errorInput {
+  border-color: #ff0000;
+}
+
+.errorMessage {
+  color: #ff0000;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 5px;
 }
 
 .middleButtons {
@@ -197,7 +215,7 @@
 }
 
 .error {
-  color: #522224;
+  color: #ff0000;
   font-family: "Poppins", sans-serif;
   font-size: 0.8rem;
   font-weight: 500;
