@@ -33,6 +33,23 @@ const Home = () => {
   const [selectedFormId, setSelectedFormId] = useState(null);
 
   useEffect(() => {
+    if (location.state?.formSaved) {
+      toast.success("Form saved successfully", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
+
+      navigate(location.pathname, { replace: true });
+    }
+    clearFormData();
+  }, [location.state?.formSaved, location.pathname, navigate, clearFormData]);
+
+  useEffect(() => {
     if (location.state?.loggedIn) {
       toast.success("Login successful", {
         position: "top-right",
@@ -272,7 +289,6 @@ const Home = () => {
           <div
             className={styles.createTypebot}
             onClick={() => {
-              clearFormData();
               navigate("/flow");
             }}
           >

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import cancelImg from "../../../assets/cancel.png";
 import { getFormById } from "../../../utils/form.js";
 import { useFormContext } from "../../../utils/FormContext.jsx";
@@ -7,7 +7,10 @@ import styles from "./Response.module.css";
 
 const Response = () => {
   const navigate = useNavigate();
-  const { formData, handleSave, handleShare, fetchFormData } = useFormContext();
+  const location = useLocation();
+  const folderId = location.state?.folderId;
+  const { formData, handleSave, handleShare, fetchFormData, updateFormData } =
+    useFormContext();
 
   const [submissions, setSubmissions] = useState([]);
   const [analytics, setAnalytics] = useState({});
@@ -39,11 +42,14 @@ const Response = () => {
   };
 
   const onSave = async () => {
+    updateFormData({
+      folderId: folderId || null,
+    });
     const savedForm = await handleSave();
     if (savedForm) {
       setIsSaved(true);
+      navigate("/home", { state: { formSaved: true } });
     }
-
   };
 
   const onShare = () => {
@@ -95,6 +101,7 @@ const Response = () => {
         <nav className={styles.middleButtons}>
           <Link
             to="/flow"
+            state={{ folderId }}
             className={`${styles.button} ${
               location.pathname === "/flow" ? styles.active : ""
             }`}
@@ -103,6 +110,7 @@ const Response = () => {
           </Link>
           <Link
             to="/theme"
+            state={{ folderId }}
             className={`${styles.button} ${
               location.pathname === "/theme" ? styles.active : ""
             }`}

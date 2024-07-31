@@ -151,6 +151,7 @@ const Flow = () => {
       const savedForm = await handleSave();
       if (savedForm) {
         setIsSaved(true);
+        navigate("/home", { state: { formSaved: true } });
       }
     }
   };
@@ -239,6 +240,7 @@ const Flow = () => {
           </Link>
           <Link
             to="/theme"
+            state={{ folderId }}
             className={`${styles.button} ${
               location.pathname === "/theme" ? styles.active : ""
             }`}
@@ -247,6 +249,7 @@ const Flow = () => {
           </Link>
           <Link
             to="/analytics"
+            state={{ folderId }}
             className={`${styles.button} ${
               location.pathname === "/analytics" ? styles.active : ""
             }`}
