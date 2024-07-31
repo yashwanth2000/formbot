@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useFormContext } from "../../../utils/FormContext.jsx";
+import { useNavigate, Link, useParams } from "react-router-dom";
+import { getFormById, updateForm } from "../../../utils/form";
 import cancelImg from "../../../assets/cancel.png";
 import LightThemeSide from "../../../assets/LightThemeSide.png";
 import LightThemeMain from "../../../assets/LightThemeMain.png";
@@ -8,35 +8,93 @@ import DarkThemeSide from "../../../assets/DarkThemeSide.png";
 import DarkThemeMain from "../../../assets/DarkThemeMain.png";
 import TailBlueThemeSide from "../../../assets/TailBlueThemeSide.png";
 import TailBlueThemeMain from "../../../assets/TailBlueThemeMain.png";
-import styles from "./Theme.module.css";
+import { toast, ToastContainer } from "react-toastify";
+import copy from "copy-to-clipboard";
+import styles from "./EditTheme.module.css";
 
-const Theme = () => {
+const EditTheme = () => {
   const navigate = useNavigate();
-  const { formData, updateFormData, handleSave, handleShare } =
-    useFormContext();
-  const [isSaved, setIsSaved] = useState(false);
-  const [selectedTheme, setSelectedTheme] = useState(formData.theme || "light");
+  const { id } = useParams();
+  const [selectedTheme, setSelectedTheme] = useState();
+  const [initialTheme, setInitialTheme] = useState();
 
   useEffect(() => {
-    if (selectedTheme !== formData.theme) {
-      updateFormData({ theme: selectedTheme });
-    }
-  }, [selectedTheme, updateFormData, formData.theme]);
+    const fetchData = async () => {
+      try {
+        const response = await getFormById(id);
+
+        if (response) {
+          setSelectedTheme(response.theme);
+          setInitialTheme(response.theme);
+        }
+      } catch (error) {
+        console.error("Error fetching form data:", error);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   const handleThemeChange = (theme) => {
     setSelectedTheme(theme);
-    updateFormData({ theme });
   };
 
-  const onSave = async () => {
-    const savedForm = await handleSave();
-    if (savedForm) {
-      setIsSaved(true);
+  const handleShare = () => {
+    const url = `${import.meta.env.VITE_SHARE_URL}/share/${id}`;
+    const success = copy(url);
+    if (success) {
+      toast.success("Link copied to clipboard", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
+    } else {
+      toast.error("Failed to copy. Please try again.", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
     }
   };
 
-  const onShare = () => {
-    handleShare();
+  const handleUpdateTheme = async () => {
+    if (selectedTheme === initialTheme) {
+      toast.info("No changes detected", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
+      return;
+    }
+
+    try {
+      const response = await updateForm(id, { theme: selectedTheme });
+      if (response) {
+        toast.success("Theme updated successfully", {
+          position: "top-right",
+          autoClose: 500,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          theme: "dark",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating form data:", error);
+    }
   };
 
   const handleCancel = () => {
@@ -48,39 +106,36 @@ const Theme = () => {
       <header className={styles.header}>
         <nav className={styles.middleButtons}>
           <Link
-            to="/flow"
+            to={`/edit/${id}`}
             className={`${styles.button} ${
-              location.pathname === "/flow" ? styles.active : ""
+              location.pathname === `/edit/${id}` ? styles.active : ""
             }`}
           >
-            Flow
+            Edit Flow
           </Link>
           <Link
+            to={`/editTheme/${id}`}
             className={`${styles.button} ${
-              location.pathname === "/theme" ? styles.active : ""
+              location.pathname === `/editTheme/${id}` ? styles.active : ""
             }`}
           >
-            Theme
+            Edit Theme
           </Link>
           <Link
-            to="/analytics"
+            to={`/editAnalytics/${id}`}
             className={`${styles.button} ${
-              location.pathname === "/analytics" ? styles.active : ""
+              location.pathname === `/editAnalytics/${id}` ? styles.active : ""
             }`}
           >
             Response
           </Link>
         </nav>
         <div className={styles.rightButtons}>
-          <button
-            className={styles.shareBtn}
-            onClick={onShare}
-            disabled={!isSaved}
-          >
+          <button className={styles.shareBtn} onClick={handleShare}>
             Share
           </button>
-          <button className={styles.saveBtn} onClick={onSave}>
-            Save
+          <button className={styles.saveBtn} onClick={handleUpdateTheme}>
+            Update
           </button>
           <img
             src={cancelImg}
@@ -145,8 +200,10 @@ const Theme = () => {
           )}
         </section>
       </main>
+
+      <ToastContainer />
     </div>
   );
 };
 
-export default Theme;
+export default EditTheme;

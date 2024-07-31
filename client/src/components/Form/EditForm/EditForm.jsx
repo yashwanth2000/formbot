@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { getFormById } from "../../../utils/form";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useFormContext } from "../../../utils/FormContext.jsx";
 import MsgIcon from "../../../assets/msgIcon.png";
 import ImgIcon from "../../../assets/imageIcon.png";
 import VideoIcon from "../../../assets/videoIcon.png";
@@ -15,20 +16,20 @@ import BtnIcon from "../../../assets/btnIcon.png";
 import FlagIcon from "../../../assets/flagIcon.png";
 import CancelImg from "../../../assets/cancel.png";
 import DeleteImg from "../../../assets/delete.png";
+import { updateForm } from "../../../utils/form";
 import { toast, ToastContainer } from "react-toastify";
-import styles from "./Flow.module.css";
+import copy from "copy-to-clipboard";
+import styles from "./EditForm.module.css";
 
-const Flow = () => {
+const EditForm = () => {
+  const { id } = useParams();
+
   const navigate = useNavigate();
   const location = useLocation();
-  const { formData, updateFormData, handleSave, handleShare } =
-    useFormContext();
-  const [formName, setFormName] = useState(formData?.name || "");
-  const [formElements, setFormElements] = useState(formData?.elements || []);
-  const [errors, setErrors] = useState({});
-  const [isSaved, setIsSaved] = useState(false);
-  const folderId = location.state?.folderId;
 
+  const [formName, setFormName] = useState("");
+  const [formElements, setFormElements] = useState([]);
+  const [errors, setErrors] = useState({});
   const [elementCounts, setElementCounts] = useState({
     text: 0,
     image: 0,
@@ -42,16 +43,58 @@ const Flow = () => {
     inputRadio: 0,
     inputButton: 0,
   });
+  const [originalForm, setOriginalForm] = useState({ name: "", elements: [] });
 
   useEffect(() => {
-    if (
-      formData.name !== formName ||
-      formData.elements !== formElements ||
-      formData.folderId !== folderId
-    ) {
-      updateFormData({ name: formName, elements: formElements, folderId });
-    }
-  }, [formName, formElements, folderId, formData, updateFormData]);
+    const fetchForm = async () => {
+      try {
+        const response = await getFormById(id);
+        setFormName(response.name);
+        setOriginalForm({ name: response.name, elements: response.elements });
+
+        const tempCounts = {
+          text: 0,
+          image: 0,
+          video: 0,
+          gif: 0,
+          inputText: 0,
+          inputNumber: 0,
+          inputEmail: 0,
+          inputPhone: 0,
+          inputDate: 0,
+          inputRadio: 0,
+          inputButton: 0,
+        };
+
+        const elementsWithLabels = response.elements.map((element) => {
+          const subType =
+            element.elementType === "bubble"
+              ? element.bubbleType
+              : element.inputType;
+          const countKey =
+            element.elementType === "bubble"
+              ? subType.toLowerCase()
+              : `input${subType}`;
+
+          tempCounts[countKey] += 1;
+
+          return {
+            ...element,
+            displayLabel: `${
+              element.elementType === "bubble" ? subType : `Input ${subType}`
+            } ${tempCounts[countKey]}`,
+          };
+        });
+
+        setElementCounts(tempCounts);
+        setFormElements(elementsWithLabels);
+      } catch (error) {
+        console.error("Error fetching forms:", error);
+      }
+    };
+
+    fetchForm();
+  }, [id]);
 
   const handleChange = (e) => {
     setFormName(e.target.value);
@@ -66,33 +109,31 @@ const Flow = () => {
   };
 
   const addBubbleElement = (subType) => {
-    const countKey = subType.toLowerCase();
     setElementCounts((prevCounts) => ({
       ...prevCounts,
-      [countKey]: prevCounts[countKey] + 1,
+      [subType.toLowerCase()]: prevCounts[subType.toLowerCase()] + 1,
     }));
 
     const newElement = {
       elementType: "bubble",
       bubbleType: subType,
       content: "",
-      displayLabel: `${subType} ${elementCounts[countKey] + 1}`,
+      displayLabel: `${subType} ${elementCounts[subType.toLowerCase()] + 1}`,
     };
     setFormElements([...formElements, newElement]);
     setErrors({ ...errors, [formElements.length]: "" });
   };
 
   const addInputElement = (subType) => {
-    const countKey = `input${subType}`;
     setElementCounts((prevCounts) => ({
       ...prevCounts,
-      [countKey]: prevCounts[countKey] + 1,
+      [`input${subType}`]: prevCounts[`input${subType}`] + 1,
     }));
 
     const newElement = {
       elementType: "input",
       inputType: subType,
-      displayLabel: `Input ${subType} ${elementCounts[countKey] + 1}`,
+      displayLabel: `Input ${subType} ${elementCounts[`input${subType}`] + 1}`,
       value: subType === "Button" ? "" : undefined,
     };
     setFormElements([...formElements, newElement]);
@@ -141,22 +182,30 @@ const Flow = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const onSave = async () => {
-    if (validateForm()) {
-      updateFormData({
-        name: formName,
-        elements: formElements,
-        folderId: folderId || null,
+  const handleShare = () => {
+    const url = `${import.meta.env.VITE_SHARE_URL}/share/${id}`;
+    const success = copy(url);
+    if (success) {
+      toast.success("Link copied to clipboard", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
       });
-      const savedForm = await handleSave();
-      if (savedForm) {
-        setIsSaved(true);
-      }
+    } else {
+      toast.error("Failed to copy. Please try again.", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
     }
-  };
-
-  const onShare = () => {
-    handleShare();
   };
 
   const handleDelete = (index) => {
@@ -165,10 +214,10 @@ const Flow = () => {
       elementType === "bubble"
         ? formElements[index].bubbleType
         : formElements[index].inputType;
+
     const countKey =
       elementType === "bubble" ? subType.toLowerCase() : `input${subType}`;
 
-    // Decrement the count for the specific element type
     setElementCounts((prevCounts) => {
       const newCount = prevCounts[countKey] > 0 ? prevCounts[countKey] - 1 : 0;
       return { ...prevCounts, [countKey]: newCount };
@@ -176,7 +225,6 @@ const Flow = () => {
 
     const updatedElements = formElements.filter((_, i) => i !== index);
 
-    // Create a temporary object to track counts for each type
     const tempCounts = {
       text: 0,
       image: 0,
@@ -191,7 +239,6 @@ const Flow = () => {
       inputButton: 0,
     };
 
-    // Update the labels of the remaining elements
     const newElements = updatedElements.map((element) => {
       const currentCountKey =
         element.elementType === "bubble"
@@ -210,6 +257,55 @@ const Flow = () => {
     });
 
     setFormElements(newElements);
+  };
+
+  const handleUpdate = async () => {
+    if (validateForm()) {
+      const updatedForm = {
+        name: formName,
+        elements: formElements,
+      };
+
+      // Compare the current data with the original data
+      if (JSON.stringify(updatedForm) !== JSON.stringify(originalForm)) {
+        try {
+          const response = await updateForm(id, updatedForm);
+          if (response) {
+            toast.success("Form updated successfully", {
+              position: "top-right",
+              autoClose: 500,
+              hideProgressBar: true,
+              closeOnClick: true,
+              pauseOnHover: false,
+              draggable: true,
+              theme: "dark",
+            });
+            setOriginalForm(updatedForm);
+          }
+        } catch (error) {
+          toast.error("Error updating form", {
+            position: "top-right",
+            autoClose: 500,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: true,
+            theme: "dark",
+          });
+          console.error("Error updating form:", error);
+        }
+      } else {
+        toast.info("No changes detected", {
+          position: "top-right",
+          autoClose: 500,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          theme: "dark",
+        });
+      }
+    }
   };
 
   return (
@@ -231,39 +327,36 @@ const Flow = () => {
         </div>
         <nav className={styles.middleButtons}>
           <Link
+            to={`/edit/${id}`}
             className={`${styles.button} ${
-              location.pathname === "/flow" ? styles.active : ""
+              location.pathname === `/edit/${id}` ? styles.active : ""
             }`}
           >
-            Flow
+            Edit Flow
           </Link>
           <Link
-            to="/theme"
+            to={`/editTheme/${id}`}
             className={`${styles.button} ${
-              location.pathname === "/theme" ? styles.active : ""
+              location.pathname === `/editTheme/${id}` ? styles.active : ""
             }`}
           >
-            Theme
+            Edit Theme
           </Link>
           <Link
-            to="/analytics"
+            to={`/editAnalytics/${id}`}
             className={`${styles.button} ${
-              location.pathname === "/analytics" ? styles.active : ""
+              location.pathname === `/editAnalytics/${id}` ? styles.active : ""
             }`}
           >
             Response
           </Link>
         </nav>
         <div className={styles.rightButtons}>
-          <button
-            className={styles.shareBtn}
-            disabled={!isSaved}
-            onClick={onShare}
-          >
+          <button className={styles.shareBtn} onClick={handleShare}>
             Share
           </button>
-          <button className={styles.saveBtn} onClick={onSave}>
-            Save
+          <button className={styles.saveBtn} onClick={handleUpdate}>
+            Update
           </button>
           <img
             src={CancelImg}
@@ -273,7 +366,6 @@ const Flow = () => {
           />
         </div>
       </header>
-
       <main className={styles.content}>
         <aside className={styles.formSideBar}>
           <section className={styles.bubbleContainer}>
@@ -500,4 +592,4 @@ const Flow = () => {
   );
 };
 
-export default Flow;
+export default EditForm;

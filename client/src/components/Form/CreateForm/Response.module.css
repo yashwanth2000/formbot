@@ -53,11 +53,16 @@
 }
 
 .shareBtn {
-  background-color: #848890;
+  background-color: #1a5fff;
 }
 
 .shareBtn:hover {
-  background-color: #a0a3a8;
+  background-color: #2757c7;
+}
+
+.shareBtn:disabled {
+  background-color: #4a4a4a;
+  cursor: not-allowed;
 }
 
 .saveBtn {

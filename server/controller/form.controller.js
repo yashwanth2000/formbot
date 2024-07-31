@@ -62,26 +62,15 @@ export const updateForm = async (req, res, next) => {
       return next(errorHandler(403, "Unauthorized access to the form"));
     }
 
-    const updateData = req.body;
-    const hasChanges = Object.keys(updateData).some(
-      (key) => form[key] !== updateData[key]
+    const updatedForm = await Form.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
     );
 
-    if (hasChanges) {
-      Object.assign(form, updateData);
-      const updatedForm = await form.save();
-      res.status(200).json(updatedForm);
-    } else {
-      res.status(200).json({ message: "No changes detected" });
-    }
+    res.status(200).json(updatedForm);
   } catch (error) {
-    if (error.name === "ValidationError") {
-      next(errorHandler(400, error.message));
-    } else if (error.kind === "ObjectId") {
-      next(errorHandler(400, "Invalid form ID"));
-    } else {
-      next(errorHandler(500, "Failed to update form"));
-    }
+    next(errorHandler(500, "Failed to update form"));
   }
 };
 

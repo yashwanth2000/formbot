@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useCallback } from "react";
 import { toast } from "react-toastify";
 import { createForm } from "../utils/form";
 import copy from "copy-to-clipboard";
@@ -13,11 +13,12 @@ export const FormProvider = ({ children }) => {
     theme: "light",
     folderId: null,
   });
-  const updateFormData = (newData) => {
-    setFormData((prevData) => ({ ...prevData, ...newData }));
-  };
 
-  const handleSave = async () => {
+  const updateFormData = useCallback((newData) => {
+    setFormData((prevData) => ({ ...prevData, ...newData }));
+  }, []);
+
+  const handleSave = useCallback(async () => {
     try {
       const formDataToSend = {
         name: formData.name,
@@ -54,9 +55,9 @@ export const FormProvider = ({ children }) => {
       });
     }
     return null;
-  };
+  }, [formData, updateFormData]);
 
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
     if (formData._id) {
       const url = `${import.meta.env.VITE_SHARE_URL}/share/${formData._id}`;
       const success = copy(url);
@@ -92,7 +93,16 @@ export const FormProvider = ({ children }) => {
         theme: "dark",
       });
     }
-  };
+  }, [formData._id]);
+
+  const clearFormData = useCallback(() => {
+    setFormData({
+      name: "",
+      elements: [],
+      theme: "light",
+      folderId: null,
+    });
+  }, []);
 
   return (
     <FormContext.Provider
@@ -101,6 +111,7 @@ export const FormProvider = ({ children }) => {
         updateFormData,
         handleSave,
         handleShare,
+        clearFormData,
       }}
     >
       {children}

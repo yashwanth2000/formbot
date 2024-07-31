@@ -30,6 +30,19 @@ export const createForm = async (data) => {
   }
 };
 
+export const updateForm = async (id, updatedForm) => {
+  try {
+    const response = await axiosInstance.put(
+      `/api/form/update/${id}`,
+      updatedForm
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error updating form:", error);
+    throw error;
+  }
+};
+
 export const getAllForms = async () => {
   try {
     const response = await axiosInstance.get("/api/form/getAll");

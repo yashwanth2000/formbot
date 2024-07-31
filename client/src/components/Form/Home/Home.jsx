@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useFormContext } from "../../../utils/FormContext";
 import { toast, ToastContainer } from "react-toastify";
 import { ChevronDown, Settings, LogOut, ChevronUp } from "lucide-react";
 import { logout } from "../../../utils/auth";
@@ -17,6 +18,7 @@ const Home = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
+  const { clearFormData } = useFormContext();
 
   const user = JSON.parse(localStorage.getItem("user"));
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -197,6 +199,10 @@ const Home = () => {
     navigate(`/folder/${id}`, { state: { folderName: name } });
   };
 
+  const handleEditForm = (id) => {
+    navigate(`/edit/${id}`);
+  };
+
   // Filter forms with folderId: null
   const filteredForms = formData.filter((form) => form.folderId === null);
 
@@ -265,7 +271,10 @@ const Home = () => {
         <section className={styles.content}>
           <div
             className={styles.createTypebot}
-            onClick={() => navigate("/flow")}
+            onClick={() => {
+              clearFormData();
+              navigate("/flow");
+            }}
           >
             <span className={styles.plus}>+</span>
             <span>Create a form bot</span>
@@ -273,7 +282,12 @@ const Home = () => {
 
           {filteredForms.map((form) => (
             <div key={form._id} className={styles.formCard}>
-              <div className={styles.formName}>{form.name}</div>
+              <div
+                className={styles.formName}
+                onClick={() => handleEditForm(form._id)}
+              >
+                {form.name}
+              </div>
               <div className={styles.deleteIcon}>
                 <img
                   src={deleteIcon}

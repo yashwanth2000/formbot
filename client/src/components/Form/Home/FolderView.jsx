@@ -93,6 +93,10 @@ const FolderView = () => {
     navigate("/home");
   };
 
+  const handleEditForm = (id) => {
+    navigate(`/edit/${id}` ,{ state: { folderId: id } });
+  };
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -144,7 +148,12 @@ const FolderView = () => {
 
           {formData.map((form) => (
             <div key={form._id} className={styles.formCard}>
-              <div className={styles.formName}>{form.name}</div>
+              <div
+                className={styles.formName}
+                onClick={() => handleEditForm(form._id)}
+              >
+                {form.name}
+              </div>
               <div className={styles.deleteIcon}>
                 <img
                   src={deleteIcon}

@@ -11,7 +11,10 @@ import Theme from "./components/Form/CreateForm/Theme";
 import Response from "./components/Form/CreateForm/Response";
 import ShareForm from "./components/Form/ShareForm/ShareForm";
 import FolderView from "./components/Form/Home/FolderView";
+import EditForm from "./components/Form/EditForm/EditForm.jsx";
 import { FormProvider } from "./utils/FormContext";
+import EditTheme from "./components/Form/EditForm/EditTheme.jsx";
+import EditResponse from "./components/Form/EditForm/EditResponse.jsx";
 
 const App = () => {
   return (
@@ -28,6 +31,9 @@ const App = () => {
             <Route path="/theme" element={<Theme />} />
             <Route path="/analytics" element={<Response />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/edit/:id" element={<EditForm />} />
+            <Route path="/editTheme/:id" element={<EditTheme />} />
+            <Route path="/editAnalytics/:id" element={<EditResponse />} />
           </Route>
           <Route path="/share/:formId" element={<ShareForm />} />
         </Routes>

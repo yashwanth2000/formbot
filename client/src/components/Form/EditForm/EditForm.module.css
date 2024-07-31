@@ -1,0 +1,325 @@
+.flowContainer {
+  background-color: #1f1f23;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  background-color: #18181b;
+  width: 100%;
+}
+
+.formNameContainer {
+  display: flex;
+  flex-direction: column;
+  margin-left: 10px;
+}
+
+.formNameInput {
+  border-radius: 3px;
+  background-color: #37373e;
+  border: 1px solid #37373e;
+  color: #767676d1;
+  font-family: "Open Sans";
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px;
+  margin-left: 10px;
+  outline: none;
+  width: 250px;
+  height: auto;
+}
+
+.errorInput {
+  border-color: #ff0000;
+}
+
+.errorMessage {
+  color: #ff0000;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 5px;
+}
+
+.middleButtons {
+  display: flex;
+  margin: 0 auto;
+}
+
+.rightButtons {
+  display: flex;
+  align-items: center;
+}
+
+.button {
+  margin-left: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  color: white;
+  font-family: "Open Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 16.8px;
+}
+
+.shareBtn,
+.saveBtn {
+  color: #fff;
+  font-family: "Open Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  margin-left: 8px;
+  padding: 4px 16px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+.shareBtn {
+  background-color: #1a5fff;
+}
+
+.shareBtn:hover {
+  background-color: #2757c7;
+}
+
+.shareBtn:disabled {
+  background-color: #4a4a4a;
+  cursor: not-allowed;
+}
+
+.saveBtn {
+  background-color: #4ade80cc;
+}
+
+.saveBtn:hover {
+  background-color: #2eac53cc;
+}
+
+.cancelIcon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-left: 8px;
+  background: none;
+  margin: 0 20px;
+  cursor: pointer;
+}
+
+.cancelIcon:hover {
+  transform: scale(1.1);
+}
+
+.content {
+  display: flex;
+  height: 100%;
+}
+
+.active {
+  border-radius: 6px;
+  border: 1px solid #7ea6ff;
+  color: #7ea6ff;
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.formSideBar {
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #18181b;
+  box-shadow: 0px 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0px 10px 10px -5px rgba(0, 0, 0, 0.04);
+  width: 300px;
+  height: 85vh;
+  padding: 30px 17px 0px 17px;
+  margin: 10px;
+}
+
+.bubbleContainer,
+.inputContainer {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.bubbleHeader,
+.inputHeader {
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.92);
+  font-family: "Open Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bubbleButtons,
+.inputButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.bubble {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid #27272a;
+  background: #1f1f23;
+  color: white;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.bubbleButton {
+  color: rgba(255, 255, 255, 0.92);
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-weight: 400;
+  border: none;
+  background: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.previewContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  flex-grow: 1;
+}
+
+.previewHeader {
+  width: 309px;
+  height: 60px;
+  border-radius: 16px;
+  background: #18181b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.previewHeader h2 {
+  color: #fff;
+  font-family: "Open Sans";
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.error {
+  color: #ff0000;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.313px;
+}
+
+.formElement {
+  position: relative;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  background: #18181b;
+  padding: 1rem;
+  width: 300px;
+}
+
+.deleteIcon {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  z-index: 10;
+  background-color: #444444;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteIcon img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.formElement h4 {
+  color: #fff;
+  font-family: "Open Sans";
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 21px;
+  margin-bottom: 10px;
+}
+
+.formElement input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 5px;
+  background: #1f1f23;
+  border: none;
+  height: 45px;
+  color: rgba(192, 192, 192, 0.31);
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+}
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  width: 100%;
+}
+
+.preview img,
+.preview video {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.elementHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background: #1f1f23;
+}
+
+.elementIcon {
+  width: 20px;
+  height: 20px;
+  margin: 0 10px;
+  background: none;
+}
+
+.inputHint {
+  color: #555;
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 10px 0;
+}

@@ -1,22 +1,22 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useParams } from "react-router-dom";
 import cancelImg from "../../../assets/cancel.png";
 import { getFormById } from "../../../utils/form.js";
-import { useFormContext } from "../../../utils/FormContext.jsx";
-import styles from "./Response.module.css";
+import { toast, ToastContainer } from "react-toastify";
+import copy from "copy-to-clipboard";
+import styles from "./EditResponse.module.css";
 
-const Response = () => {
+const EditResponse = () => {
   const navigate = useNavigate();
-  const { formData, handleSave, handleShare, fetchFormData } = useFormContext();
+  const { id } = useParams();
 
   const [submissions, setSubmissions] = useState([]);
   const [analytics, setAnalytics] = useState({});
-  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getFormById(formData._id);
+        const response = await getFormById(id);
 
         if (response && response.analytics && response.submissions) {
           setAnalytics(response.analytics);
@@ -29,25 +29,37 @@ const Response = () => {
       }
     };
 
-    if (formData._id) {
-      fetchData();
-    }
-  }, [formData._id, fetchFormData]);
+    fetchData();
+  }, [id]);
 
   const handleCancel = () => {
     navigate("/home");
   };
 
-  const onSave = async () => {
-    const savedForm = await handleSave();
-    if (savedForm) {
-      setIsSaved(true);
+  const handleShare = () => {
+    const url = `${import.meta.env.VITE_SHARE_URL}/share/${id}`;
+    const success = copy(url);
+    if (success) {
+      toast.success("Link copied to clipboard", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
+    } else {
+      toast.error("Failed to copy. Please try again.", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
     }
-
-  };
-
-  const onShare = () => {
-    handleShare();
   };
 
   const {
@@ -89,44 +101,42 @@ const Response = () => {
 
   const groupedSubmissions = groupSubmissions(submissions);
 
+  // Determine unique field IDs for table headers
+  const fieldIds = [...new Set(submissions.map((sub) => sub.elementId))];
+  const fieldHeaders = fieldIds.map((id, index) => `Field ${index + 1}`);
+
   return (
     <div className={styles.responseContainer}>
       <header className={styles.header}>
         <nav className={styles.middleButtons}>
           <Link
-            to="/flow"
+            to={`/edit/${id}`}
             className={`${styles.button} ${
-              location.pathname === "/flow" ? styles.active : ""
+              location.pathname === `/edit/${id}` ? styles.active : ""
             }`}
           >
-            Flow
+            Edit Flow
           </Link>
           <Link
-            to="/theme"
+            to={`/editTheme/${id}`}
             className={`${styles.button} ${
-              location.pathname === "/theme" ? styles.active : ""
+              location.pathname === `/editTheme/${id}` ? styles.active : ""
             }`}
           >
-            Theme
+            Edit Theme
           </Link>
           <Link
+            to={`/editAnalytics/${id}`}
             className={`${styles.button} ${
-              location.pathname === "/analytics" ? styles.active : ""
+              location.pathname === `/editAnalytics/${id}` ? styles.active : ""
             }`}
           >
             Response
           </Link>
         </nav>
         <div className={styles.rightButtons}>
-          <button
-            className={styles.shareBtn}
-            onClick={onShare}
-            disabled={!isSaved}
-          >
+          <button className={styles.shareBtn} onClick={handleShare}>
             Share
-          </button>
-          <button className={styles.saveBtn} onClick={onSave}>
-            Save
           </button>
           <img
             src={cancelImg}
@@ -155,7 +165,11 @@ const Response = () => {
               </div>
               <div className={`${styles.statItem} ${styles.thirdStat}`}>
                 <p className={styles.thirdStatP}>Completion Rate</p>
-                <p>{completionRate ? `${completionRate * 100}%` : "0%"}</p>
+                <p>
+                  {completionRate
+                    ? `${Math.floor(completionRate * 100)}%`
+                    : "0%"}
+                </p>
               </div>
             </section>
 
@@ -163,10 +177,11 @@ const Response = () => {
               <table className={styles.submissionsTable}>
                 <thead>
                   <tr>
-                    <th>#</th>
+                    <th></th>
                     <th>Submitted At</th>
-                    <th>Field 1</th>
-                    <th>Field 2</th>
+                    {fieldHeaders.map((header, index) => (
+                      <th key={index}>{header}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -174,8 +189,9 @@ const Response = () => {
                     <tr key={index}>
                       <td>{index + 1}</td>
                       <td>{formatDate(submission.submittedAt)}</td>
-                      <td>{submission._id || ""}</td>
-                      <td>{submission._id || ""}</td>
+                      {fieldIds.map((id, i) => (
+                        <td key={i}>{submission[id] || ""}</td>
+                      ))}
                     </tr>
                   ))}
                 </tbody>
@@ -184,8 +200,10 @@ const Response = () => {
           </>
         )}
       </main>
+
+      <ToastContainer />
     </div>
   );
 };
 
-export default Response;
+export default EditResponse;
