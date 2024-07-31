@@ -170,7 +170,7 @@ export const updateFormAnalytics = async (req, res, next) => {
 
 export const getFormsByFolder = async (req, res) => {
   try {
-    const { folderId } = req.params; // Changed from req.body to req.params
+    const { folderId } = req.params;
 
     const forms = await Form.find({ folderId });
     res.status(200).json(forms);

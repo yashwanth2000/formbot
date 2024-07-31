@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useFormContext } from "../../../utils/FormContext.jsx";
 import MsgIcon from "../../../assets/msgIcon.png";
 import ImgIcon from "../../../assets/imageIcon.png";
 import VideoIcon from "../../../assets/videoIcon.png";
@@ -15,17 +16,18 @@ import FlagIcon from "../../../assets/flagIcon.png";
 import CancelImg from "../../../assets/cancel.png";
 import DeleteImg from "../../../assets/delete.png";
 import { toast, ToastContainer } from "react-toastify";
-import { createForm } from "../../../utils/form";
-import copy from "copy-to-clipboard";
 import styles from "./Flow.module.css";
 
 const Flow = () => {
   const navigate = useNavigate();
-  const [formId, setFormId] = useState("");
-  const [formName, setFormName] = useState("");
-  const [formElements, setFormElements] = useState([]);
+  const location = useLocation();
+  const { formData, updateFormData, handleSave, handleShare } =
+    useFormContext();
+  const [formName, setFormName] = useState(formData?.name || "");
+  const [formElements, setFormElements] = useState(formData?.elements || []);
   const [errors, setErrors] = useState({});
   const [isSaved, setIsSaved] = useState(false);
+  const folderId = location.state?.folderId;
 
   const [elementCounts, setElementCounts] = useState({
     text: 0,
@@ -40,6 +42,16 @@ const Flow = () => {
     inputRadio: 0,
     inputButton: 0,
   });
+
+  useEffect(() => {
+    if (
+      formData.name !== formName ||
+      formData.elements !== formElements ||
+      formData.folderId !== folderId
+    ) {
+      updateFormData({ name: formName, elements: formElements, folderId });
+    }
+  }, [formName, formElements, folderId, formData, updateFormData]);
 
   const handleChange = (e) => {
     setFormName(e.target.value);
@@ -111,7 +123,7 @@ const Flow = () => {
       newErrors.formElements = "At least one bubble and one input are required";
       toast.error("At least one bubble and one input are required", {
         position: "top-right",
-        autoClose: 1000,
+        autoClose: 500,
         hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: false,
@@ -129,59 +141,24 @@ const Flow = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSave = async () => {
+  const onSave = async () => {
     if (validateForm()) {
-      try {
-        const formData = {
-          name: formName,
-          elements: formElements.map((element) => {
-            if (element.elementType === "bubble") {
-              return {
-                elementType: element.elementType,
-                bubbleType: element.bubbleType,
-                content: element.content,
-              };
-            } else {
-              return {
-                elementType: element.elementType,
-                inputType: element.inputType,
-                label: element.label || `Enter ${element.inputType}`,
-                value: element.inputType === "Button" ? element.value : "",
-              };
-            }
-          }),
-        };
-
-        const response = await createForm(formData);
-
-        if (response) {
-          toast.success("Form saved successfully", {
-            position: "top-right",
-            autoClose: 1000,
-            hideProgressBar: true,
-            closeOnClick: true,
-            pauseOnHover: false,
-            draggable: true,
-            theme: "dark",
-          });
-
-          setFormId(response._id);
-          setIsSaved(true);
-        }
-      } catch (error) {
-        console.error("Error saving form:", error);
-        toast.error("Error saving form", {
-          position: "top-right",
-          autoClose: 1000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          theme: "dark",
-        });
+      updateFormData({
+        name: formName,
+        elements: formElements,
+        folderId: folderId || null,
+      });
+      const savedForm = await handleSave();
+      if (savedForm) {
+        setIsSaved(true);
       }
     }
   };
+
+  const onShare = () => {
+    handleShare();
+  };
+
 
   const handleDelete = (index) => {
     const elementType = formElements[index].elementType;
@@ -236,37 +213,6 @@ const Flow = () => {
     setFormElements(newElements);
   };
 
-  const handleShare = () => {
-    const url = import.meta.env.VITE_SHARE_URL + `/share/${formId}`;
-
-    try {
-      const success = copy(url);
-      if (success) {
-        toast.success("Link copied to clipboard", {
-          position: "top-right",
-          autoClose: 1000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          theme: "dark",
-        });
-      } else {
-        toast.error("Failed to copy. Please try again.", {
-          position: "top-right",
-          autoClose: 1000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          theme: "dark",
-        });
-      }
-    } catch (error) {
-      console.error("Failed to copy to clipboard:", error);
-    }
-  };
-
   return (
     <div className={styles.flowContainer}>
       <header className={styles.header}>
@@ -285,11 +231,27 @@ const Flow = () => {
           )}
         </div>
         <nav className={styles.middleButtons}>
-          <Link className={styles.button}>Flow</Link>
-          <Link to="/theme" className={styles.button}>
+          <Link
+            className={`${styles.button} ${
+              location.pathname === "/flow" ? styles.active : ""
+            }`}
+          >
+            Flow
+          </Link>
+          <Link
+            to="/theme"
+            className={`${styles.button} ${
+              location.pathname === "/theme" ? styles.active : ""
+            }`}
+          >
             Theme
           </Link>
-          <Link to="/analytics" className={styles.button}>
+          <Link
+            to="/analytics"
+            className={`${styles.button} ${
+              location.pathname === "/analytics" ? styles.active : ""
+            }`}
+          >
             Response
           </Link>
         </nav>
@@ -297,11 +259,11 @@ const Flow = () => {
           <button
             className={styles.shareBtn}
             disabled={!isSaved}
-            onClick={handleShare}
+            onClick={onShare}
           >
             Share
           </button>
-          <button className={styles.saveBtn} onClick={handleSave}>
+          <button className={styles.saveBtn} onClick={onSave}>
             Save
           </button>
           <img

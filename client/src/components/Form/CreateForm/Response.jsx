@@ -2,21 +2,22 @@ import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import cancelImg from "../../../assets/cancel.png";
 import { getFormById } from "../../../utils/form";
+import { useFormContext } from "../../../utils/FormContext.jsx";
 import styles from "./Response.module.css";
 
 const Response = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({});
+  const { formData, handleSave, handleShare } = useFormContext();
   const [submissions, setSubmissions] = useState([]);
-
-  console.log(submissions);
+  const [analytics, setAnalytics] = useState({});
 
   useEffect(() => {
+    
     const fetchData = async () => {
       try {
-        const response = await getFormById("66a8d44087d2d660b4119121");
+        const response = await getFormById(formData._id);
         if (response && response.analytics && response.submissions) {
-          setFormData(response.analytics);
+          setAnalytics(response.analytics);
           setSubmissions(response.submissions);
         } else {
           console.error("Unexpected response structure:", response);
@@ -26,11 +27,21 @@ const Response = () => {
       }
     };
 
-    fetchData();
-  }, []);
+    if (formData._id) {
+      fetchData();
+    }
+  }, [formData._id]);
 
   const handleCancel = () => {
     navigate("/home");
+  };
+
+  const onSave = async () => {
+    await handleSave();
+  };
+
+  const onShare = () => {
+    handleShare();
   };
 
   const {
@@ -38,7 +49,7 @@ const Response = () => {
     starts = 0,
     completions = 0,
     completionRate = 0,
-  } = formData || {};
+  } = analytics;
   const noResponse = views === 0 && starts === 0 && completions === 0;
 
   const formatDate = (dateString) => {
@@ -47,6 +58,7 @@ const Response = () => {
       timeZone: "Asia/Kolkata",
       month: "short",
       day: "2-digit",
+      year: "numeric",
     };
     return new Intl.DateTimeFormat("en-IN", options).format(date);
   };
@@ -75,17 +87,37 @@ const Response = () => {
     <div className={styles.responseContainer}>
       <header className={styles.header}>
         <nav className={styles.middleButtons}>
-          <Link to="/flow" className={styles.button}>
+          <Link
+            to="/flow"
+            className={`${styles.button} ${
+              location.pathname === "/flow" ? styles.active : ""
+            }`}
+          >
             Flow
           </Link>
-          <Link to="/theme" className={styles.button}>
+          <Link
+            to="/theme"
+            className={`${styles.button} ${
+              location.pathname === "/theme" ? styles.active : ""
+            }`}
+          >
             Theme
           </Link>
-          <Link className={styles.button}>Response</Link>
+          <Link
+            className={`${styles.button} ${
+              location.pathname === "/analytics" ? styles.active : ""
+            }`}
+          >
+            Response
+          </Link>
         </nav>
         <div className={styles.rightButtons}>
-          <button className={styles.shareBtn}>Share</button>
-          <button className={styles.saveBtn}>Save</button>
+          <button className={styles.shareBtn} onClick={onShare}>
+            Share
+          </button>
+          <button className={styles.saveBtn} onClick={onSave}>
+            Save
+          </button>
           <img
             src={cancelImg}
             alt="Cancel"
@@ -121,10 +153,10 @@ const Response = () => {
               <table className={styles.submissionsTable}>
                 <thead>
                   <tr>
-                    <th></th>
+                    <th>#</th>
                     <th>Submitted At</th>
-                    <th></th>
-                    <th></th>
+                    <th>Field 1</th>
+                    <th>Field 2</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -132,8 +164,8 @@ const Response = () => {
                     <tr key={index}>
                       <td>{index + 1}</td>
                       <td>{formatDate(submission.submittedAt)}</td>
-                      <td>{submission["66a89cac2365454bc40b889e"] || ""}</td>
-                      <td>{submission["66a89cac2365454bc40b88a0"] || ""}</td>
+                      <td>{submission._id || ""}</td>
+                      <td>{submission._id || ""}</td>
                     </tr>
                   ))}
                 </tbody>

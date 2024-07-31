@@ -20,6 +20,8 @@ const FolderView = () => {
   const [formData, setFormData] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeleteFormModal, setShowDeleteFormModal] = useState(null);
+  const [selectedFormId, setSelectedFormId] = useState(null);
 
   useEffect(() => {
     const fetchForms = async () => {
@@ -34,40 +36,14 @@ const FolderView = () => {
     fetchForms();
   }, [id]);
 
-  // const handleCreateForm = async () => {
-  //   if (newFormName.trim() !== "") {
-  //     try {
-  //       await createForm({ name: newFormName, folderId: id });
-  //       const updatedForms = await getAllFormsByFolder(id);
-  //       setForms(updatedForms);
-  //       setNewFormName("");
-  //       toast.success("Form created successfully", {
-  //         position: "top-right",
-  //         autoClose: 500,
-  //         hideProgressBar: true,
-  //         closeOnClick: true,
-  //         pauseOnHover: false,
-  //         draggable: true,
-  //         theme: "dark",
-  //       });
-  //     } catch (error) {
-  //       console.error("Error creating form:", error);
-  //       toast.error("Failed to create form", {
-  //         position: "top-right",
-  //         autoClose: 500,
-  //         hideProgressBar: true,
-  //         closeOnClick: true,
-  //         pauseOnHover: false,
-  //         draggable: true,
-  //         theme: "dark",
-  //       });
-  //     }
-  //   }
-  // };
+  const toggleDeleteFormModal = (id) => {
+    setSelectedFormId(id);
+    setShowDeleteFormModal(!showDeleteFormModal);
+  };
 
-  const handleDeleteForm = async (id) => {
+  const handleDeleteForm = async () => {
     try {
-      const response = await deleteForm(id);
+      const response = await deleteForm(selectedFormId);
       if (response) {
         toast.success("Form deleted successfully", {
           position: "top-right",
@@ -78,6 +54,7 @@ const FolderView = () => {
           draggable: true,
           theme: "dark",
         });
+        setShowDeleteFormModal(false);
         window.location.reload();
       }
     } catch (error) {
@@ -159,7 +136,7 @@ const FolderView = () => {
         <section className={styles.content}>
           <div
             className={styles.createTypebot}
-            onClick={() => navigate("/flow")}
+            onClick={() => navigate("/flow", { state: { folderId: id } })}
           >
             <span className={styles.plus}>+</span>
             <span>Create a form bot</span>
@@ -172,13 +149,25 @@ const FolderView = () => {
                 <img
                   src={deleteIcon}
                   alt="Delete"
-                  onClick={() => handleDeleteForm(form._id)}
+                  onClick={() => toggleDeleteFormModal(form._id)}
                 />
               </div>
             </div>
           ))}
         </section>
       </main>
+      {showDeleteFormModal && (
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true">
+          <div className={styles.modal}>
+            <p>Are you sure you want to delete this form?</p>
+            <div className={styles.modalButtons}>
+              <button onClick={handleDeleteForm}>Yes, Delete</button>
+              <span className={styles.separator}>|</span>
+              <button onClick={toggleDeleteFormModal}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
       {showLogoutModal && (
         <div className={styles.modalOverlay} role="dialog" aria-modal="true">
           <div className={styles.modal}>

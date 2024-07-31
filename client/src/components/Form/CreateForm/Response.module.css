@@ -82,6 +82,15 @@
   transform: scale(1.1);
 }
 
+.active {
+  border-radius: 6px;
+  border: 1px solid #7ea6ff;
+  color: #7ea6ff;
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .main {
   margin-top: 3rem;
   flex-grow: 1;

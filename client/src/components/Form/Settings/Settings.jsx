@@ -105,7 +105,7 @@ const Settings = () => {
         error.response?.data?.message || "Failed to update profile";
       toast.error(errorMsg, {
         position: "top-right",
-        autoClose: 1000,
+        autoClose: 500,
         hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: false,

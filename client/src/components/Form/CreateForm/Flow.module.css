@@ -127,6 +127,15 @@
   height: 100%;
 }
 
+.active {
+  border-radius: 6px;
+  border: 1px solid #7ea6ff;
+  color: #7ea6ff;
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .formSideBar {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.16);

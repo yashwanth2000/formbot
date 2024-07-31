@@ -11,25 +11,28 @@ import Theme from "./components/Form/CreateForm/Theme";
 import Response from "./components/Form/CreateForm/Response";
 import ShareForm from "./components/Form/ShareForm/ShareForm";
 import FolderView from "./components/Form/Home/FolderView";
+import { FormProvider } from "./utils/FormContext";
 
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route element={<PrivateRoute />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/folder/:id" element={<FolderView />} />
-          <Route path="/flow" element={<Flow />} />
-          <Route path="/theme" element={<Theme />} />
-          <Route path="/analytics" element={<Response />} />
-          <Route path="/settings" element={<Settings />} />
-        </Route>
-        <Route path="/share/:formId" element={<ShareForm />} />
-      </Routes>
-    </BrowserRouter>
+    <FormProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route element={<PrivateRoute />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/folder/:id" element={<FolderView />} />
+            <Route path="/flow" element={<Flow />} />
+            <Route path="/theme" element={<Theme />} />
+            <Route path="/analytics" element={<Response />} />
+            <Route path="/settings" element={<Settings />} />
+          </Route>
+          <Route path="/share/:formId" element={<ShareForm />} />
+        </Routes>
+      </BrowserRouter>
+    </FormProvider>
   );
 };
 

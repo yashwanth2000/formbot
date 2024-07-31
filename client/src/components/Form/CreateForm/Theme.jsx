@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { useFormContext } from "../../../utils/FormContext.jsx";
 import cancelImg from "../../../assets/cancel.png";
 import LightThemeSide from "../../../assets/LightThemeSide.png";
 import LightThemeMain from "../../../assets/LightThemeMain.png";
@@ -11,10 +12,27 @@ import styles from "./Theme.module.css";
 
 const Theme = () => {
   const navigate = useNavigate();
-  const [selectedTheme, setSelectedTheme] = useState("light");
+  const { formData, updateFormData, handleSave, handleShare } =
+    useFormContext();
+  const [selectedTheme, setSelectedTheme] = useState(formData.theme || "light");
+
+  useEffect(() => {
+    if (selectedTheme !== formData.theme) {
+      updateFormData({ theme: selectedTheme });
+    }
+  }, [selectedTheme, updateFormData, formData.theme]);
 
   const handleThemeChange = (theme) => {
     setSelectedTheme(theme);
+    updateFormData({ theme });
+  };
+
+  const onSave = async () => {
+    await handleSave();
+  };
+
+  const onShare = () => {
+    handleShare();
   };
 
   const handleCancel = () => {
@@ -25,17 +43,37 @@ const Theme = () => {
     <div className={styles.themeContainer}>
       <header className={styles.header}>
         <nav className={styles.middleButtons}>
-          <Link to="/flow" className={styles.button}>
+          <Link
+            to="/flow"
+            className={`${styles.button} ${
+              location.pathname === "/flow" ? styles.active : ""
+            }`}
+          >
             Flow
           </Link>
-          <Link className={styles.button}>Theme</Link>
-          <Link to="/analytics" className={styles.button}>
+          <Link
+            className={`${styles.button} ${
+              location.pathname === "/theme" ? styles.active : ""
+            }`}
+          >
+            Theme
+          </Link>
+          <Link
+            to="/analytics"
+            className={`${styles.button} ${
+              location.pathname === "/analytics" ? styles.active : ""
+            }`}
+          >
             Response
           </Link>
         </nav>
         <div className={styles.rightButtons}>
-          <button className={styles.shareBtn}>Share</button>
-          <button className={styles.saveBtn}>Save</button>
+          <button className={styles.shareBtn} onClick={onShare}>
+            Share
+          </button>
+          <button className={styles.saveBtn} onClick={onSave}>
+            Save
+          </button>
           <img
             src={cancelImg}
             alt="Cancel"
@@ -51,7 +89,7 @@ const Theme = () => {
           <div className={styles.themeOptions}>
             <div
               className={`${styles.themeOption} ${
-                selectedTheme === "light" ? styles.active : ""
+                selectedTheme === "light" ? styles.previewSideImage : ""
               }`}
               onClick={() => handleThemeChange("light")}
             >
@@ -59,7 +97,7 @@ const Theme = () => {
             </div>
             <div
               className={`${styles.themeOption} ${
-                selectedTheme === "dark" ? styles.active : ""
+                selectedTheme === "dark" ? styles.previewSideImage : ""
               }`}
               onClick={() => handleThemeChange("dark")}
             >
@@ -67,7 +105,7 @@ const Theme = () => {
             </div>
             <div
               className={`${styles.themeOption} ${
-                selectedTheme === "tailblue" ? styles.active : ""
+                selectedTheme === "tailblue" ? styles.previewSideImage : ""
               }`}
               onClick={() => handleThemeChange("tailblue")}
             >

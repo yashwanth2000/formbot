@@ -83,6 +83,15 @@
   transform: scale(1.1);
 }
 
+.active {
+  border-radius: 6px;
+  border: 1px solid #7ea6ff;
+  color: #7ea6ff;
+  font-family: "Open Sans";
+  font-size: 14px;
+  font-weight: 600;
+}
+
 .content {
   display: flex;
   height: 100%;
@@ -111,7 +120,7 @@
   text-align: center;
 }
 
-.themeOption.active img {
+.previewSideImage {
   border: 2px solid blue;
   border-radius: 8px;
 }

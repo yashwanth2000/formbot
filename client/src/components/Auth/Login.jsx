@@ -30,7 +30,7 @@ const Login = () => {
     if (location.state?.registered) {
       toast.success("Registered successfully. Please login", {
         position: "top-right",
-        autoClose: 1000,
+        autoClose: 500,
         hideProgressBar: true,
         closeOnClick: true,
         pauseOnHover: false,

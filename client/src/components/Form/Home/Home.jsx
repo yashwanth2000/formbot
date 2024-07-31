@@ -22,9 +22,13 @@ const Home = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showCreateFolderModal, setShowCreateFolderModal] = useState(false);
+  const [showDeleteFolderModal, setShowDeleteFolderModal] = useState(false);
+  const [showDeleteFormModal, setShowDeleteFormModal] = useState(null);
   const [folders, setFolders] = useState([]);
   const [newFolderName, setNewFolderName] = useState("");
   const [formData, setFormData] = useState([]);
+  const [selectedFolderId, setSelectedFolderId] = useState(null);
+  const [selectedFormId, setSelectedFormId] = useState(null);
 
   useEffect(() => {
     if (location.state?.loggedIn) {
@@ -80,6 +84,16 @@ const Home = () => {
     setShowLogoutModal(!showLogoutModal);
   };
 
+  const toggleDeleteFormModal = (id) => {
+    setSelectedFormId(id);
+    setShowDeleteFormModal(!showDeleteFormModal);
+  };
+
+  const toggleDeleteFolderModal = (id) => {
+    setSelectedFolderId(id);
+    setShowDeleteFolderModal(!showDeleteFolderModal);
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate("/", { state: { loggedOut: true } });
@@ -119,9 +133,9 @@ const Home = () => {
     }
   };
 
-  const handleDeleteFolder = async (id) => {
+  const handleDeleteFolder = async () => {
     try {
-      await deleteFolder(id);
+      await deleteFolder(selectedFolderId);
       const updatedFolders = await getAllFolders();
       setFolders(updatedFolders);
       toast.success("Folder deleted successfully", {
@@ -133,6 +147,7 @@ const Home = () => {
         draggable: true,
         theme: "dark",
       });
+      setShowDeleteFolderModal(false);
       navigate("/home");
     } catch (error) {
       console.error("Error deleting folder:", error);
@@ -148,9 +163,9 @@ const Home = () => {
     }
   };
 
-  const handleDeleteForm = async (id) => {
+  const handleDeleteForm = async () => {
     try {
-      const response = await deleteForm(id);
+      const response = await deleteForm(selectedFormId);
       if (response) {
         toast.success("Form deleted successfully", {
           position: "top-right",
@@ -161,6 +176,7 @@ const Home = () => {
           draggable: true,
           theme: "dark",
         });
+        setShowDeleteFormModal(false);
         window.location.reload();
       }
     } catch (error) {
@@ -216,30 +232,30 @@ const Home = () => {
       </header>
       <main className={styles.mainContainer}>
         <section className={styles.folderContainer}>
-          <div className={styles.createFolderSection}>
+          <div
+            className={styles.createFolderSection}
+            onClick={toggleCreateFolderModal}
+          >
             <img
               src={folderIcon}
               alt="Add Folder"
               className={styles.folderIcon}
             />
-            <button
-              className={styles.addFolderButton}
-              onClick={toggleCreateFolderModal}
-            >
-              Create Folder
-            </button>
+            <button className={styles.addFolderButton}>Create Folder</button>
           </div>
           <div className={styles.folders}>
             {folders.map((folder) => (
               <div key={folder._id} className={styles.createdFolder}>
-                <span onClick={() => handleFolderClick(folder._id, folder.name)}>
+                <span
+                  onClick={() => handleFolderClick(folder._id, folder.name)}
+                >
                   {folder.name}
                 </span>
                 <img
                   src={deleteIcon}
                   alt="Delete Folder"
                   className={styles.folderIcon}
-                  onClick={() => handleDeleteFolder(folder._id)}
+                  onClick={() => toggleDeleteFolderModal(folder._id)}
                 />
               </div>
             ))}
@@ -255,22 +271,18 @@ const Home = () => {
             <span>Create a form bot</span>
           </div>
 
-          {filteredForms.length > 0 ? (
-            filteredForms.map((form) => (
-              <div key={form._id} className={styles.formCard}>
-                <div className={styles.formName}>{form.name}</div>
-                <div className={styles.deleteIcon}>
-                  <img
-                    src={deleteIcon}
-                    alt="Delete"
-                    onClick={() => handleDeleteForm(form._id)}
-                  />
-                </div>
+          {filteredForms.map((form) => (
+            <div key={form._id} className={styles.formCard}>
+              <div className={styles.formName}>{form.name}</div>
+              <div className={styles.deleteIcon}>
+                <img
+                  src={deleteIcon}
+                  alt="Delete"
+                  onClick={() => toggleDeleteFormModal(form._id)}
+                />
               </div>
-            ))
-          ) : (
-            <p>No forms to display</p>
-          )}
+            </div>
+          ))}
         </section>
       </main>
       {showLogoutModal && (
@@ -305,6 +317,31 @@ const Home = () => {
           </div>
         </div>
       )}
+      {showDeleteFormModal && (
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true">
+          <div className={styles.modal}>
+            <p>Are you sure you want to delete this form?</p>
+            <div className={styles.modalButtons}>
+              <button onClick={handleDeleteForm}>Yes, Delete</button>
+              <span className={styles.separator}>|</span>
+              <button onClick={toggleDeleteFormModal}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDeleteFolderModal && (
+        <div className={styles.modalOverlay} role="dialog" aria-modal="true">
+          <div className={styles.modal}>
+            <p>Are you sure you want to delete this folder?</p>
+            <div className={styles.modalButtons}>
+              <button onClick={handleDeleteFolder}>Yes, Delete</button>
+              <span className={styles.separator}>|</span>
+              <button onClick={toggleDeleteFolderModal}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <ToastContainer />
     </div>
   );
