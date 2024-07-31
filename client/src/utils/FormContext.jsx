@@ -31,15 +31,6 @@ export const FormProvider = ({ children }) => {
 
       if (response && response._id) {
         updateFormData({ ...response });
-        toast.success("Form saved successfully", {
-          position: "top-right",
-          autoClose: 500,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: true,
-          theme: "dark",
-        });
         return response;
       }
     } catch (error) {

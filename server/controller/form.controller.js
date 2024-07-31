@@ -94,38 +94,6 @@ export const deleteForm = async (req, res, next) => {
   }
 };
 
-export const updateInputValue = async (req, res, next) => {
-  try {
-    const { formId, elementId } = req.params;
-    const { value } = req.body;
-
-    const form = await Form.findById(formId);
-    if (!form) {
-      return res.status(404).json({ message: "Form not found" });
-    }
-
-    const element = form.elements.id(elementId);
-    if (!element) {
-      return res.status(404).json({ message: "Element not found" });
-    }
-
-    if (element.elementType !== "input") {
-      return res.status(400).json({ message: "Element is not of type input" });
-    }
-
-    // Add new submission instead of updating the element
-    form.submissions.push({
-      elementId: element._id,
-      value: value,
-    });
-
-    await form.save();
-    res.json(form.submissions[form.submissions.length - 1]);
-  } catch (error) {
-    next(errorHandler(500, error.message));
-  }
-};
-
 export const updateFormAnalytics = async (req, res, next) => {
   try {
     const form = await Form.findById(req.params.id);
@@ -166,5 +134,32 @@ export const getFormsByFolder = async (req, res) => {
   } catch (error) {
     console.error("Error fetching forms by folder:", error);
     res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const submitFormBatch = async (req, res, next) => {
+  try {
+    const { formId } = req.params;
+    const submissionData = req.body;
+
+    const form = await Form.findById(formId);
+    if (!form) {
+      return res.status(404).json({ message: "Form not found" });
+    }
+
+    const newSubmission = {
+      submittedAt: new Date(),
+      data: submissionData,
+    };
+
+    form.submissions.push(newSubmission);
+    await form.save();
+
+    res.status(200).json({
+      message: "Form submitted successfully",
+      submission: newSubmission,
+    });
+  } catch (error) {
+    next(errorHandler(500, error.message));
   }
 };

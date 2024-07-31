@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   getFormById,
-  updateInputValue,
   updateFormAnalytics,
+  submitFormBatch,
 } from "../../../utils/form";
-import SendICon from "../../../assets/send.png";
+import SendIcon from "../../../assets/send.png";
+import { toast, ToastContainer } from "react-toastify";
 import styles from "./ShareForm.module.css";
 
 const ShareForm = () => {
@@ -20,6 +21,7 @@ const ShareForm = () => {
   const [submittedInputs, setSubmittedInputs] = useState({});
   const [selectedRadios, setSelectedRadios] = useState({});
   const [inputErrors, setInputErrors] = useState({});
+  const [formSubmission, setFormSubmission] = useState({});
 
   useEffect(() => {
     const fetchForm = async () => {
@@ -31,7 +33,7 @@ const ShareForm = () => {
         await updateFormAnalytics(
           formId,
           fetchedForm.analytics.completions,
-          fetchedForm.analytics.views + 1,
+          fetchedForm.analytics.views + 2,
           fetchedForm.analytics.starts
         );
       } catch (error) {
@@ -65,6 +67,11 @@ const ShareForm = () => {
     }));
 
     setUserInputs((prev) => ({ ...prev, [elementId]: value }));
+
+    setFormSubmission((prev) => ({
+      ...prev,
+      [elementId]: value,
+    }));
 
     if (inputType === "Radio") {
       setSelectedRadios((prev) => ({
@@ -111,8 +118,6 @@ const ShareForm = () => {
 
       setInputErrors((prev) => ({ ...prev, [elementId]: "" }));
 
-      await updateInputValue(formId, elementId, userInputs[elementId]);
-
       setSubmittedInputs((prev) => ({
         ...prev,
         [elementId]: userInputs[elementId],
@@ -139,31 +144,65 @@ const ShareForm = () => {
         setCurrentElementIndex((prev) => prev + 1);
         setShowNextElement(true);
       } else {
-        await updateFormAnalytics(
-          formId,
-          form.analytics.completions + 1,
-          form.analytics.views,
-          form.analytics.starts
-        );
+        // This is the last element, submit the entire form
+        await handleFormCompletion();
       }
     }
   };
 
-  const handleButtonClick = (elementId) => {
+  const handleButtonClick = async (elementId, value) => {
     if (clickedButtons[elementId]) return;
-
+  
     setClickedButtons((prev) => ({ ...prev, [elementId]: true }));
-
+  
+    setFormSubmission((prev) => ({
+      ...prev,
+      [elementId]: value,
+    }));
+  
     if (currentElementIndex < form.elements.length - 1) {
       setCurrentElementIndex((prev) => prev + 1);
       setShowNextElement(true);
     } else {
-      updateFormAnalytics(
+      await handleFormCompletion();
+    }
+  };
+
+  const handleFormCompletion = async () => {
+    try {
+      await submitFormBatch(formId, formSubmission);
+
+      await updateFormAnalytics(
         formId,
         form.analytics.completions + 1,
         form.analytics.views,
         form.analytics.starts
       );
+
+      setFormSubmission({});
+      toast.success(
+        "Form submitted successfully. Refresh the page to enter new data or close the page.",
+        {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: false,
+          draggable: true,
+          theme: "dark",
+        }
+      );
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("Error submitting form", {
+        position: "top-right",
+        autoClose: 500,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true,
+        theme: "dark",
+      });
     }
   };
 
@@ -196,7 +235,7 @@ const ShareForm = () => {
                 className={`${styles.inputButton} ${
                   clickedButtons[element._id] ? styles.buttonClicked : ""
                 }`}
-                onClick={() => handleButtonClick(element._id)}
+                onClick={() => handleButtonClick(element._id, element.value)}
                 disabled={!!clickedButtons[element._id]}
               >
                 {element.value || "Button"}{" "}
@@ -232,7 +271,7 @@ const ShareForm = () => {
                   }`}
                   disabled={!!submittedInputs[element._id]}
                 >
-                  <img src={SendICon} alt="Send Icon" />
+                  <img src={SendIcon} alt="Send Icon" />
                 </button>
               </div>
             ) : (
@@ -266,7 +305,7 @@ const ShareForm = () => {
                     }`}
                     disabled={!!submittedInputs[element._id]}
                   >
-                    <img src={SendICon} alt="Send Icon" />
+                    <img src={SendIcon} alt="Send Icon" />
                   </button>
                 </>
                 <div className={styles.errorMessageContainer}>
@@ -296,6 +335,7 @@ const ShareForm = () => {
           </div>
         ))}
       </div>
+      <ToastContainer />
     </div>
   );
 };

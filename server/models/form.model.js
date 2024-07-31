@@ -57,9 +57,8 @@ const formSchema = new mongoose.Schema(
     },
     submissions: [
       {
-        elementId: mongoose.Schema.Types.ObjectId,
-        value: mongoose.Schema.Types.Mixed,
         submittedAt: { type: Date, default: Date.now },
+        data: { type: mongoose.Schema.Types.Mixed },
       },
     ],
     analytics: {

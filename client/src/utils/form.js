@@ -73,19 +73,6 @@ export const deleteForm = async (formId) => {
   }
 };
 
-export const updateInputValue = async (formId, elementId, value) => {
-  try {
-    const response = await axiosInstance.put(
-      `/api/form/updateInputValue/${formId}/${elementId}`,
-      { value }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Error updating input value:", error);
-    throw error;
-  }
-};
-
 export const updateFormAnalytics = async (
   formId,
   completions,
@@ -112,6 +99,19 @@ export const getAllFormsByFolder = async (folderId) => {
     return response.data;
   } catch (error) {
     console.error("Error getting forms by folder:", error);
+    throw error;
+  }
+};
+
+export const submitFormBatch = async (formId, formData) => {
+  try {
+    const response = await axiosInstance.post(
+      `/api/form/submitBatch/${formId}`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting form batch:", error);
     throw error;
   }
 };

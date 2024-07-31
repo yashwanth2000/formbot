@@ -10,22 +10,26 @@ const EditResponse = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const [submissions, setSubmissions] = useState([]);
-  const [analytics, setAnalytics] = useState({});
+  const [form, setForm] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const response = await getFormById(id);
 
         if (response && response.analytics && response.submissions) {
-          setAnalytics(response.analytics);
-          setSubmissions(response.submissions);
+          setForm(response);
         } else {
-          console.error("Unexpected response structure:", response);
+          throw new Error("Unexpected response structure");
         }
       } catch (error) {
         console.error("Error fetching form data:", error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -62,6 +66,25 @@ const EditResponse = () => {
     }
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = {
+      timeZone: "Asia/Kolkata",
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    };
+    return new Intl.DateTimeFormat("en-IN", options).format(date);
+  };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!form) return <div>No form data available.</div>;
+
+  const { analytics, elements, submissions } = form;
   const {
     views = 0,
     starts = 0,
@@ -70,40 +93,12 @@ const EditResponse = () => {
   } = analytics;
   const noResponse = views === 0 && starts === 0 && completions === 0;
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const options = {
-      timeZone: "Asia/Kolkata",
-      month: "short",
-      day: "2-digit",
-      year: "numeric",
-    };
-    return new Intl.DateTimeFormat("en-IN", options).format(date);
-  };
-
-  const groupSubmissions = (submissions) => {
-    const grouped = {};
-    submissions.forEach((sub) => {
-      const key =
-        sub.submittedAt.split("T")[0] +
-        " " +
-        sub.submittedAt.split("T")[1].split(".")[0];
-      if (!grouped[key]) {
-        grouped[key] = {};
-      }
-      grouped[key][sub.elementId] = sub.value;
-    });
-    return Object.entries(grouped).map(([key, value]) => ({
-      submittedAt: key,
-      ...value,
-    }));
-  };
-
-  const groupedSubmissions = groupSubmissions(submissions);
-
-  // Determine unique field IDs for table headers
-  const fieldIds = [...new Set(submissions.map((sub) => sub.elementId))];
-  const fieldHeaders = fieldIds.map((id, index) => `Field ${index + 1}`);
+  // Get input elements and their labels
+  const inputElements = elements.filter((elem) => elem.elementType === "input");
+  const fieldLabels = inputElements.reduce((acc, elem) => {
+    acc[elem._id] = elem.label || `Field `;
+    return acc;
+  }, {});
 
   return (
     <div className={styles.responseContainer}>
@@ -127,9 +122,7 @@ const EditResponse = () => {
           </Link>
           <Link
             to={`/editAnalytics/${id}`}
-            className={`${styles.button} ${
-              location.pathname === `/editAnalytics/${id}` ? styles.active : ""
-            }`}
+            className={`${styles.button} ${styles.active}`}
           >
             Response
           </Link>
@@ -177,20 +170,20 @@ const EditResponse = () => {
               <table className={styles.submissionsTable}>
                 <thead>
                   <tr>
-                    <th></th>
                     <th>Submitted At</th>
-                    {fieldHeaders.map((header, index) => (
-                      <th key={index}>{header}</th>
+                    {inputElements.map((elem) => (
+                      <th key={elem._id}>{fieldLabels[elem._id]}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {groupedSubmissions.map((submission, index) => (
+                  {submissions.map((submission, index) => (
                     <tr key={index}>
-                      <td>{index + 1}</td>
                       <td>{formatDate(submission.submittedAt)}</td>
-                      {fieldIds.map((id, i) => (
-                        <td key={i}>{submission[id] || ""}</td>
+                      {inputElements.map((elem) => (
+                        <td key={elem._id}>
+                          {submission.data[elem._id] || ""}
+                        </td>
                       ))}
                     </tr>
                   ))}
